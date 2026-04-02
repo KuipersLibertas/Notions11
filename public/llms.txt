@@ -1,0 +1,12 @@
+# www.notions11.com llms.txt
+
+> Enhance Notion sharing by providing security, customization, analytics, and branding tools for link management and content protection.
+
+- [Notions11 Features](https://www.notions11.com): Promote and explain features of Notions11 for securing and managing Notion links.
+- [Sign Up Page](https://www.notions11.com/signup): Register new users for an online service or platform.
+- [Link Error Notice](https://www.notions11.com/company-terms): Inform users that the requested link is unavailable or broken.
+- [Notions11 Overview](https://www.notions11.com/about-us): Introduce Notions11, a service for securing and managing password-protected Notion links.
+- [Notions11 Sign In](https://www.notions11.com/signin): Allows users to log into their Notions11 accounts.
+- [Terms of Service](https://www.notions11.com/terms-of-service): Provides legal terms, conditions, and user guidelines for using Notions11 website.
+- [Privacy Policy](https://www.notions11.com/privacy-policy): To outline Notions11's privacy practices and data protection policies.
+
