@@ -39,7 +39,7 @@ const UploadLogo = (): JSX.Element => {
           const data = {
             ...session,
             user: {
-              ...session.user,
+              ...session?.user,
               logo: ''
             }
           };
@@ -83,7 +83,7 @@ const UploadLogo = (): JSX.Element => {
           const data = {
             ...session,
             user: {
-              ...session.user,
+              ...session?.user,
               logo: response.file
             }
           };

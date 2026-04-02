@@ -124,12 +124,12 @@ export async function POST(
 
     // ── Links ─────────────────────────────────────────────────────────────────
     case 'save-link': {
-      const result = await linksDb.saveLink(userId, req);
+      const result = await linksDb.saveLink(userId, req as any);
       return NextResponse.json(result);
     }
 
     case 'update-link': {
-      const result = await linksDb.updateLink(userId, req);
+      const result = await linksDb.updateLink(userId, req as any);
       return NextResponse.json(result);
     }
 

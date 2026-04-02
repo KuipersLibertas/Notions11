@@ -49,7 +49,7 @@ export async function getEarningLinkList(targetUserId: number, period: string) {
   // Group by link_id
   const grouped: Record<number, { link_id: number; status: number; price: number; total: number; count: number; passdrop_url: string }> = {};
   for (const row of data ?? []) {
-    const link = row.file_list_user as { passdrop_url: string };
+    const link = row.file_list_user as unknown as { passdrop_url: string };
     if (!grouped[row.link_id]) {
       grouped[row.link_id] = {
         link_id: row.link_id,
@@ -109,7 +109,7 @@ export async function linkReport(period: string, userName?: string, url?: string
   const aggMap: Record<number, LinkAgg> = {};
 
   for (const row of data ?? []) {
-    const link = row.file_list_user as { id: number; expire_count: number; expires_on: string | null; user_id: number; users: { user_name: string; user_email: string; is_pro: number } };
+    const link = row.file_list_user as unknown as { id: number; expire_count: number; expires_on: string | null; user_id: number; users: { user_name: string; user_email: string; is_pro: number } };
     if (!userName || link.users.user_name?.toLowerCase().includes(userName.toLowerCase())) {
       if (!aggMap[row.link_id]) {
         aggMap[row.link_id] = {

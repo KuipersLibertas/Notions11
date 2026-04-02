@@ -193,7 +193,7 @@ const ManageUsers = () => {
                 ?
                 <Box
                   component="img"
-                  src={logo}
+                  src={String(logo)}
                   width="50px"
                   height="50px"
                 />

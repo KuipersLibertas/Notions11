@@ -30,7 +30,7 @@ export async function upgradePro(userId: number) {
     .eq('id', userId)
     .single();
 
-  const checkoutParams: Parameters<typeof stripe.checkout.sessions.create>[0] = {
+  const checkoutParams: Record<string, any> = {
     mode: 'subscription',
     payment_method_types: ['card'],
     line_items: [{ price: STRIPE_PRICE_ID, quantity: 1 }],
@@ -47,7 +47,7 @@ export async function upgradePro(userId: number) {
     checkoutParams.customer = user.stripe_id;
   }
 
-  const session = await stripe.checkout.sessions.create(checkoutParams);
+  const session = await stripe.checkout.sessions.create(checkoutParams as any);
   return { success: true as const, url: session.url };
 }
 

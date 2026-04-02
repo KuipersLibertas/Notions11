@@ -13,7 +13,7 @@ const ManageLink = async (): Promise<JSX.Element> => {
     redirect('/signin');
   }
 
-  let linkList = [];
+  let linkList: any[] = [];
   try {
     linkList = await getLinkList(session!.user.id);
   } catch (error) {
