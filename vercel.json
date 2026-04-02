@@ -1,0 +1,10 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "functions": {
+    "src/app/api/admin/export/route.ts": {
+      "maxDuration": 30
+    }
+  }
+}
