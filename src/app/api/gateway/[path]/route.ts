@@ -19,7 +19,7 @@ export async function GET(
     return NextResponse.json({ success: false, message: 'Authentication is required' }, { status: 401 });
   }
 
-  const userId: number = session?.user?.id;
+  const userId: number = session?.user?.id as number;
 
   switch (params.path) {
     case 'cancel-pro': {
@@ -81,7 +81,7 @@ export async function POST(
     return NextResponse.json({ success: false, message: 'Authentication is required' }, { status: 401 });
   }
 
-  const userId: number = session?.user?.id;
+  const userId: number = session?.user?.id as number;
 
   // Handle multipart form data for file uploads separately
   if (params.path === 'upload-logo') {
