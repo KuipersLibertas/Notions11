@@ -62,10 +62,14 @@ const AnalyticsModal = ({ opened, linkInfo, onClose }: UpgradeProModalProps): JS
       );
       const json = await response.json();
 
-      if (json.success) {
-        setTotalDownloadCount(json.data.downloadCount);
-        setTotalCityCount(json.data.ipCount);
-        setList(json.data.city ?? []);
+      if (json.success && json.data) {
+        setTotalDownloadCount(json.data.downloadCount ?? 0);
+        setTotalCityCount(json.data.ipCount ?? 0);
+        setList(Array.isArray(json.data.city) ? json.data.city : []);
+      } else {
+        setTotalDownloadCount(0);
+        setTotalCityCount(0);
+        setList([]);
       }
     } catch (error) {
       console.log(error);
