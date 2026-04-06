@@ -20,7 +20,6 @@ import { ApplicationProvider } from '@/contexts/ApplicationContext';
 import { SessionProvider } from 'next-auth/react';
 import { useSession } from 'next-auth/react';
 import { AppMode, UserLevel } from '@/utils/constants';
-import Script from 'next/script';
 
 type MainLayoutProps = {
   children: React.ReactNode,
@@ -87,18 +86,6 @@ const MainLayout = ({
 
   return (
     <Box>
-      <Script src="https://www.googletagmanager.com/gtag/js?id=G-DVL1BCNBS0" async />
-      <Script 
-        dangerouslySetInnerHTML={{
-          __html: `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-
-          gtag('config', 'G-DVL1BCNBS0');
-          `
-        }}
-      />
       <SessionProvider>
         <ApplicationProvider value={appState}>
           {mode === 1&&
