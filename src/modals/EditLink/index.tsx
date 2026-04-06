@@ -106,42 +106,31 @@ const EditLink = ({
       id: linkInfo.id,
       link: customLink,
       password: customPassword,
-      files: linkInfo.files,
-      emailNotify: false,
-      trackIp: false,
+      files: files,
+      emailNotify: selectedNotifyEmail,
+      trackIp: selectedTrackIp,
       cost: 0,
       expiryCount: 0,
       expiryOn: '',
     };
 
-    if (session?.user.level && session?.user.level > UserLevel.Normal) {
-      if (selectedExpiry) {
-        if (selectedExpiryType === 'count') {
-          const count = expiryCount.length > 0 ? parseInt(expiryCount, 10) : 0;
-          if (count > 0) {
-            data['expiryCount'] = count;
-            const { expiry_count, ...rest } = errors_;
-            console.log(expiry_count);
-            errors_ = rest;
-          } else {
-            errors_['expiryCount'] = { message: 'Please enter a valid number' };
-          }
-        }
-
-        if (selectedExpiryType === 'date') {
-          if (expiryDate.length > 0) {
-            data['expiryOn'] = expiryDate;
-            const { expiry_on, ...rest } = errors_;
-            console.log(expiry_on);
-            errors_ = rest;
-          } else {
-            errors_['expiry_on'] = { message: 'Please select a valid date' };
-          }
+    if (selectedExpiry) {
+      if (selectedExpiryType === 'count') {
+        const count = expiryCount.length > 0 ? parseInt(expiryCount, 10) : 0;
+        if (count > 0) {
+          data['expiryCount'] = count;
+        } else {
+          errors_['expiryCount'] = { message: 'Please enter a valid number' };
         }
       }
 
-      data['emailNotify'] = selectedNotifyEmail;
-      data['trackIp'] = selectedTrackIp;
+      if (selectedExpiryType === 'date') {
+        if (expiryDate.length > 0) {
+          data['expiryOn'] = expiryDate;
+        } else {
+          errors_['expiry_on'] = { message: 'Please select a valid date' };
+        }
+      }
     }
 
     if (session?.user.level === UserLevel.Admin) {
