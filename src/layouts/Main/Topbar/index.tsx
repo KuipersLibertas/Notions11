@@ -113,8 +113,8 @@ const Topbar = ({
               ? Images.DarkLogo
               : Images.LightLogo
           }
-          height={18}
-          width={74}
+          height={36}
+          width={148}
         />
       </Box>
       {initiated&&

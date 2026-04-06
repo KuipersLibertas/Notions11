@@ -102,7 +102,7 @@ const Sidebar = ({
             component="a"
             href="/"
             title=""
-            width={{ xs: 140 }}
+            width={{ xs: 280 }}
           >
             <Box
               component="img"
