@@ -30,8 +30,7 @@ const Transition = React.forwardRef(function Transition(
 
 interface IAnalytics {
   city: string;
-  ipCount: number;
-  downloadCount: number;
+  count: number;
 }
 const AnalyticsModal = ({ opened, linkInfo, onClose }: UpgradeProModalProps): JSX.Element => {
   const theme = useTheme();
@@ -55,20 +54,19 @@ const AnalyticsModal = ({ opened, linkInfo, onClose }: UpgradeProModalProps): JS
     setIsLoadProcessing(true);
     try {
       const response = await fetch(
-        '/api/gateway/link-analytics', 
-        { 
+        '/api/gateway/link-analytics',
+        {
           method: 'POST',
-          body: JSON.stringify({ id: linkInfo.id }) 
+          body: JSON.stringify({ id: linkInfo.id })
         }
       );
       const json = await response.json();
-      setList(json);
 
-      const cityCount = json.reduce((acc: number, cur: IAnalytics) => cur.ipCount + acc, 0);
-      const downloadCount = json.reduce((acc: number, cur: IAnalytics) => cur.downloadCount + acc, 0);
-
-      setTotalCityCount(cityCount);
-      setTotalDownloadCount(downloadCount);
+      if (json.success) {
+        setTotalDownloadCount(json.data.downloadCount);
+        setTotalCityCount(json.data.ipCount);
+        setList(json.data.city ?? []);
+      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -146,13 +144,13 @@ const AnalyticsModal = ({ opened, linkInfo, onClose }: UpgradeProModalProps): JS
               columnGap={2}
             >
               <Box width={150}>
-                <Typography>{item.city}</Typography>
+                <Typography>{item.city || 'Unknown'}</Typography>
               </Box>
               <Box flex={1}>
-                <Typography>{item.ipCount}</Typography>
+                <Typography>{item.count}</Typography>
               </Box>
               <Box flex={1}>
-                <Typography>{item.downloadCount}</Typography>
+                <Typography>—</Typography>
               </Box>
             </Box>
           )}
