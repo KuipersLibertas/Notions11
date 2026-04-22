@@ -40,7 +40,7 @@ const Footer = (): JSX.Element => {
               gutterBottom
               textAlign={{ xs: 'center', md: 'left' }}
             >
-              &copy; Passdropit. 2023, All rights reserved
+              &copy; Notions11. 2026, All rights reserved
             </Typography>
           </Box>
           <Box justifyContent="flex-end">
