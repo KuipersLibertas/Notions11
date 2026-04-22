@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { stripe } from '@/lib/stripe';
 
-const STRIPE_PRICE_ID = 'price_1M5QUkE4EcK5n9JaGcmiQB4F';
+const STRIPE_PRICE_ID = 'price_1MaIQlIiPwNsdugo6TOqqoWk';
 const SITE_URL = process.env.NEXT_PUBLIC_NOTIONS11_SITE_URL ?? 'https://notions11.com';
 
 export async function getSubscription(userId: number) {

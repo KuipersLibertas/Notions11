@@ -1,7 +1,7 @@
 import { ToastOptions } from 'react-toastify';
 
 export const AppMode = {
-  Free: true
+  Free: false
 };
 
 export const ThemeMode = {
