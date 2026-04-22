@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { stripe } from '@/lib/stripe';
+import { formatUser } from '@/lib/db/auth';
 
 const STRIPE_PRICE_ID = 'price_1MaIQlIiPwNsdugo6TOqqoWk';
 const SITE_URL = process.env.NEXT_PUBLIC_NOTIONS11_SITE_URL ?? 'https://notions11.com';
@@ -64,7 +65,14 @@ export async function cancelPro(userId: number) {
     .update({ email_notify: false, track_ip: false, is_paid: null, expires_on: null, expire_count: 0 })
     .eq('user_id', userId);
 
-  return { success: true as const };
+  // Return the updated user so the client can rebuild the session JWT
+  const { data: user } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  return { success: true as const, user: user ? formatUser(user) : null };
 }
 
 export async function uploadLogo(userId: number, fileBuffer: Buffer, mimeType: string) {

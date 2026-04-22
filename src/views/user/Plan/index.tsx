@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import UserLayout from '@/views/shared/layouts/UserLayout';
 
 import { toast } from 'react-toastify';
@@ -24,6 +25,8 @@ import Confirm from '@/modals/Confirm';
 
 const Plan = (): JSX.Element => {
   const { data: session, update } = useSession();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [initiated, setInitiated] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -60,9 +63,25 @@ const Plan = (): JSX.Element => {
 
   useEffect(() => {
     if (initiated) return;
-
     setInitiated(true);
   }, []);
+
+  // After Stripe checkout the success route redirects here with ?upgraded=1.
+  // Fetch fresh user data from the DB and rebuild the session JWT so the UI
+  // reflects the new Pro status without requiring a sign-out / sign-in.
+  useEffect(() => {
+    if (searchParams.get('upgraded') !== '1') return;
+
+    fetch('/api/gateway/get-me')
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && json.user) {
+          update({ user: { ...json.user, auth_token: session?.user?.auth_token ?? '' } });
+        }
+        router.replace('/user/plan');
+      })
+      .catch(() => router.replace('/user/plan'));
+  }, [searchParams]);
 
   const handleCancel = async (): Promise<void> => {
     if (isProcessing) return;
@@ -73,9 +92,10 @@ const Plan = (): JSX.Element => {
       const response = await fetch('/api/gateway/cancel-pro');
       const json = await response.json();
       if (json.success) {
-        const data = { ...session, user: { ...json.user, auth_token: session?.user.auth_token } };
-        console.log(data);
-        update(data);
+        if (json.user) {
+          const data = { ...session, user: { ...json.user, auth_token: session?.user?.auth_token ?? '' } };
+          update(data);
+        }
         toast.success('Sorry, Your account is cancelled.', CustomToastOptions);
       } else {
         toast.error(json.message, CustomToastOptions);

@@ -38,5 +38,5 @@ export async function GET(request: Request) {
     }
   }
 
-  redirect('/user/plan');
+  redirect('/user/plan?upgraded=1');
 }
