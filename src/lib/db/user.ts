@@ -16,12 +16,23 @@ export async function getSubscription(userId: number) {
     return { success: false as const, message: 'No active subscription found' };
   }
 
-  const portalSession = await stripe.billingPortal.sessions.create({
-    customer: user.stripe_id,
-    return_url: `${SITE_URL}/user/plan`,
-  });
-
-  return { success: true as const, url: portalSession.url };
+  try {
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: user.stripe_id,
+      return_url: `${SITE_URL}/user/plan`,
+    });
+    return { success: true as const, url: portalSession.url };
+  } catch (error: any) {
+    // Stale customer ID (e.g. test/live mode mismatch, or customer deleted in Stripe)
+    if (error?.statusCode === 404 || error?.code === 'resource_missing') {
+      await supabase
+        .from('users')
+        .update({ stripe_id: null, subscription_id: null })
+        .eq('id', userId);
+      return { success: false as const, message: 'Subscription record not found in Stripe. Your account has been reset — please subscribe again.' };
+    }
+    throw error;
+  }
 }
 
 export async function upgradePro(userId: number) {
