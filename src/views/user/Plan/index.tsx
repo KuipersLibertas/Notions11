@@ -275,14 +275,14 @@ const Plan = (): JSX.Element => {
         <Typography variant="subtitle2" color="text.secondary">
           Notions11 is always improving, and we would love to hear your feedback, via&nbsp;
           <Link
-            href="mailto:"
+            href="mailto:contact@notions11.com"
             sx={{ textDecoration: 'none' }}
           >
             Email
           </Link>
           &nbsp;or&nbsp;
           <Link
-            href="https://www.twitter.com/passdropit"
+            href="https://x.com/Notions_11"
             sx={{ textDecoration: 'none' }}
           >
             Twitter
