@@ -45,8 +45,8 @@ const UpgradeProModal = ({ opened }: UpgradeProModalProps): JSX.Element => {
     subtitle: 'Notions11 Pro includes everything in your Free Acct plus:',
     features: [
       'Your Logo on Download Pages',
-      'Passwords on Dropbox Folders',
-      'Analytics on Your Dropbox Links',
+      'Passwords on Notion Links',
+      'Analytics on Your Notion Links',
       'Download Notifications',
       'Set Expiring Links',
     ],

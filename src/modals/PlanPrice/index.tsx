@@ -64,7 +64,7 @@ const PlanPrice = ({ opened, onClose }: PlanPriceModalProps): JSX.Element => {
         'Analytics on Your Links',
         'Emailed Download Notifications',
         'Expiring Links',
-        'Dropbox Folders',
+        'Notion Links',
       ],
       isHighlighted: true,
     }
