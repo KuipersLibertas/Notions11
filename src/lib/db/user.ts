@@ -65,31 +65,48 @@ export async function upgradePro(userId: number) {
 }
 
 // Called when the user returns from the Stripe Customer Portal.
-// Retrieves the live subscription status from Stripe and updates the DB
-// directly by userId — more reliable than deactivatePro() which does a
-// second lookup by stripe_id and can fail silently.
+// Lists ALL subscriptions for the Stripe customer and deactivates the
+// account if none are genuinely active. Looks up by stripe_id (customer)
+// rather than subscription_id so stale subscription IDs don't block it.
 export async function syncSubscription(userId: number) {
-  const { data: dbUser } = await supabase
+  const { data: dbUser, error: dbErr } = await supabase
     .from('users')
     .select('stripe_id, subscription_id, is_pro')
     .eq('id', userId)
     .single();
 
-  if (dbUser?.subscription_id) {
+  console.log(`syncSubscription START userId=${userId} dbUser=${JSON.stringify(dbUser)} dbErr=${dbErr?.message}`);
+
+  if (dbUser?.stripe_id) {
     try {
-      const subscription = await stripe.subscriptions.retrieve(dbUser.subscription_id);
+      // List all subscriptions for this customer — more robust than
+      // retrieving by subscription_id which can be stale.
+      const subscriptions = await stripe.subscriptions.list({
+        customer: dbUser.stripe_id,
+        limit: 10,
+      });
 
-      const stillActive =
-        ['active', 'trialing'].includes(subscription.status) &&
-        !subscription.cancel_at_period_end;
+      console.log(`syncSubscription Stripe returned ${subscriptions.data.length} subscription(s)`);
+      subscriptions.data.forEach((sub, i) => {
+        console.log(`  [${i}] id=${sub.id} status=${sub.status} cancel_at_period_end=${sub.cancel_at_period_end}`);
+      });
 
-      console.log(`syncSubscription userId=${userId} status=${subscription.status} cancel_at_period_end=${subscription.cancel_at_period_end} stillActive=${stillActive}`);
+      // A subscription is "genuinely active" if its status is active/trialing
+      // AND it is not already scheduled to cancel at period end.
+      const hasActive = subscriptions.data.some(
+        (sub) =>
+          ['active', 'trialing'].includes(sub.status) &&
+          !sub.cancel_at_period_end,
+      );
 
-      if (!stillActive) {
-        await supabase
+      console.log(`syncSubscription hasActive=${hasActive} currentIsPro=${dbUser.is_pro}`);
+
+      if (!hasActive) {
+        const { error: updateErr } = await supabase
           .from('users')
           .update({ is_pro: 0, stripe_id: null, subscription_id: null })
           .eq('id', userId);
+        console.log(`syncSubscription users update error=${updateErr?.message ?? 'none'}`);
 
         await supabase
           .from('file_list_user')
@@ -97,13 +114,15 @@ export async function syncSubscription(userId: number) {
           .eq('user_id', userId);
       }
     } catch (err: any) {
-      // Subscription not found in Stripe — clear stale data
-      console.error(`syncSubscription: Stripe error for userId=${userId}:`, err.message);
+      console.error(`syncSubscription Stripe error userId=${userId}:`, err.message);
+      // Stripe couldn't find the customer — clear the stale data
       await supabase
         .from('users')
         .update({ is_pro: 0, stripe_id: null, subscription_id: null })
         .eq('id', userId);
     }
+  } else {
+    console.log(`syncSubscription skipped — no stripe_id in DB for userId=${userId}`);
   }
 
   const { data: fresh } = await supabase
@@ -112,6 +131,7 @@ export async function syncSubscription(userId: number) {
     .eq('id', userId)
     .single();
 
+  console.log(`syncSubscription END userId=${userId} fresh.is_pro=${fresh?.is_pro}`);
   return fresh ? formatUser(fresh) : null;
 }
 

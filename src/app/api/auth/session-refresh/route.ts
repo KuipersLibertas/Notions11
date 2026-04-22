@@ -26,6 +26,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const sync        = searchParams.get('sync')        === '1';
   const callbackUrl = searchParams.get('callbackUrl') ?? '/user/plan';
+
+  console.log(`session-refresh userId=${userId} sync=${sync} callbackUrl=${callbackUrl}`);
   const target      = new URL(callbackUrl, request.url);
 
   let freshUser = null;
