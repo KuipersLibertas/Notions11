@@ -64,6 +64,48 @@ export async function upgradePro(userId: number) {
   return { success: true as const, url: session.url };
 }
 
+// Called when the user returns from the Stripe Customer Portal.
+// Retrieves the live subscription status from Stripe and updates the DB
+// so the session reflects the true state without relying on webhooks.
+export async function syncSubscription(userId: number) {
+  const { data: dbUser } = await supabase
+    .from('users')
+    .select('stripe_id, subscription_id')
+    .eq('id', userId)
+    .single();
+
+  if (dbUser?.stripe_id && dbUser?.subscription_id) {
+    try {
+      const subscription = await stripe.subscriptions.retrieve(dbUser.subscription_id);
+
+      // Deactivate if cancelled or if the user chose "cancel at period end"
+      // (we treat that as an immediate cancellation for simplicity)
+      const stillActive =
+        ['active', 'trialing'].includes(subscription.status) &&
+        !subscription.cancel_at_period_end;
+
+      if (!stillActive) {
+        await deactivatePro(dbUser.stripe_id);
+      }
+    } catch {
+      // Subscription ID not found in Stripe — clear stale data
+      await supabase
+        .from('users')
+        .update({ is_pro: 0, stripe_id: null, subscription_id: null })
+        .eq('id', userId);
+    }
+  }
+
+  // Return the fresh user row so the caller can rebuild the session JWT
+  const { data: fresh } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  return fresh ? formatUser(fresh) : null;
+}
+
 export async function cancelPro(userId: number) {
   await supabase
     .from('users')

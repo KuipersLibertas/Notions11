@@ -14,7 +14,7 @@ export async function GET(
 ) {
   const session = await getServerSession(authOptions);
 
-  const guardedPaths = ['cancel-pro', 'export-activity', 'get-user-list', 'user-subscription', 'get-me'];
+  const guardedPaths = ['cancel-pro', 'export-activity', 'get-user-list', 'user-subscription', 'get-me', 'sync-subscription'];
   if (guardedPaths.includes(params.path) && !session) {
     return NextResponse.json({ success: false, message: 'Authentication is required' }, { status: 401 });
   }
@@ -30,6 +30,12 @@ export async function GET(
 
       case 'get-me': {
         const user = await authDb.getUserById(userId);
+        if (!user) return NextResponse.json({ success: false, message: 'User not found' });
+        return NextResponse.json({ success: true, user });
+      }
+
+      case 'sync-subscription': {
+        const user = await userDb.syncSubscription(userId);
         if (!user) return NextResponse.json({ success: false, message: 'User not found' });
         return NextResponse.json({ success: true, user });
       }

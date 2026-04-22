@@ -66,17 +66,20 @@ const Plan = (): JSX.Element => {
     setInitiated(true);
   }, []);
 
-  // Refresh the session JWT whenever returning from Stripe (checkout or portal).
-  // ?upgraded=1  → set by the upgrade success route after activatePro()
-  // ?from_portal=1 → set by the Stripe portal return_url
-  // In both cases we fetch fresh user data from the DB so the UI reflects
-  // the latest Pro status without requiring a sign-out / sign-in.
+  // Refresh the session JWT whenever returning from Stripe.
+  // ?upgraded=1    → upgrade success route: fetch fresh data and update session
+  // ?from_portal=1 → portal return: sync subscription status directly from
+  //                  Stripe API, update DB, then rebuild the session JWT
   useEffect(() => {
     const upgraded = searchParams.get('upgraded') === '1';
     const fromPortal = searchParams.get('from_portal') === '1';
     if (!upgraded && !fromPortal) return;
 
-    fetch('/api/gateway/get-me')
+    // Portal return uses sync-subscription so the DB is updated from live
+    // Stripe data before we rebuild the session — no webhook dependency.
+    const endpoint = fromPortal ? '/api/gateway/sync-subscription' : '/api/gateway/get-me';
+
+    fetch(endpoint)
       .then((r) => r.json())
       .then((json) => {
         if (json.success && json.user) {
