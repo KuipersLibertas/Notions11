@@ -43,8 +43,9 @@ export async function upgradePro(userId: number) {
     metadata: { user_id: String(userId) },
   };
 
-  if (user?.stripe_id) {
-    checkoutParams.customer = user.stripe_id;
+  const stripeId = user?.stripe_id && user.stripe_id !== 'null' ? user.stripe_id : null;
+  if (stripeId) {
+    checkoutParams.customer = stripeId;
   }
 
   const session = await stripe.checkout.sessions.create(checkoutParams as any);
