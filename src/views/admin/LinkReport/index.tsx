@@ -68,7 +68,7 @@ const initialColumns = [
   },
   {
     name: 'passdrop_url',
-    label: 'Passdropit URL',
+    label: 'Notions11 URL',
     options: {
       filter: false,
       display: true,

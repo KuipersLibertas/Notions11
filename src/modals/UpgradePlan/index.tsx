@@ -42,7 +42,7 @@ const UpgradeProModal = ({ opened }: UpgradeProModalProps): JSX.Element => {
 
   const item = {
     title: 'Upgrade to Notions11 Pro!',
-    subtitle: 'Passdropit Pro includes everything in your Free Acct plus:',
+    subtitle: 'Notions11 Pro includes everything in your Free Acct plus:',
     features: [
       'Your Logo on Download Pages',
       'Passwords on Dropbox Folders',

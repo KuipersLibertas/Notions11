@@ -133,7 +133,7 @@ const PaidLinkEarning = (): JSX.Element => {
       const json = await response.json();
       const list: IEarningLink[] = json.data.map((v: IEarningLink) => ({
         ...v,
-        passdrop_url: `Passdropit.com/${v.passdrop_url}`,
+        passdrop_url: `Notions11.com/${v.passdrop_url}`,
         fee: v.total * 0.1 + 0.30
       }));
       setEarningLinkList(list);

@@ -48,7 +48,7 @@ const PlanPrice = ({ opened, onClose }: PlanPriceModalProps): JSX.Element => {
       subtitle: '',
       price: 0,
       features: [
-        'Unlimited Passdropit Links',
+        'Unlimited Notions11 Links',
         'Customize Links and Passwords',
         'Send-It-Then',
         'Edit/Manage Your Links',
