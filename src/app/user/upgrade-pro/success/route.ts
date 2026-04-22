@@ -38,5 +38,5 @@ export async function GET(request: Request) {
     }
   }
 
-  redirect('/user/plan?upgraded=1');
+  redirect('/api/auth/session-refresh?callbackUrl=/user/plan');
 }

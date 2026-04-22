@@ -19,7 +19,7 @@ export async function getSubscription(userId: number) {
   try {
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: user.stripe_id,
-      return_url: `${SITE_URL}/user/plan?from_portal=1`,
+      return_url: `${SITE_URL}/api/auth/session-refresh?sync=1&callbackUrl=/user/plan`,
     });
     return { success: true as const, url: portalSession.url };
   } catch (error: any) {

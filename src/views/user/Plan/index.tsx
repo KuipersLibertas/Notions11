@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import UserLayout from '@/views/shared/layouts/UserLayout';
 
 import { toast } from 'react-toastify';
@@ -23,9 +23,8 @@ import { useSession } from 'next-auth/react';
 import Confirm from '@/modals/Confirm';
 
 const Plan = (): JSX.Element => {
-  const { data: session, update } = useSession();
+  const { data: session } = useSession();
 
-  const [initiated, setInitiated] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [paymentMode] = useState<number>(PaymentMode.Stripe);
   const [showConfirmPopup, setShowConfirmPopup] = useState<boolean>(false);
@@ -58,59 +57,6 @@ const Plan = (): JSX.Element => {
     }
   ];
 
-  useEffect(() => {
-    if (initiated) return;
-    setInitiated(true);
-  }, []);
-
-  // On mount, read query params and sessionStorage directly from the browser
-  // (avoids Next.js useSearchParams hydration quirks).
-  //
-  // ?upgraded=1    — set by the upgrade-pro success route after activatePro()
-  // ?from_portal=1 — set by the Stripe portal return_url
-  // stripePortalReturn in sessionStorage — backup flag set in handleCancel
-  //   before the browser leaves for the portal (survives the round-trip even
-  //   if Stripe strips query params from the return URL).
-  //
-  // Sequence for portal return:
-  //   1. sync-subscription  → ask Stripe for live status, update DB
-  //   2. get-me             → read fresh user row from DB
-  //   3. update()           → rewrite the NextAuth JWT cookie
-  //   4. window.location.replace → hard reload so the new cookie is read
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const upgraded   = params.get('upgraded')    === '1';
-    const fromPortal = params.get('from_portal') === '1'
-                    || sessionStorage.getItem('stripePortalReturn') === '1';
-
-    if (!upgraded && !fromPortal) return;
-
-    // Clear the sessionStorage flag so it doesn't trigger on the next visit
-    sessionStorage.removeItem('stripePortalReturn');
-
-    (async () => {
-      try {
-        // Portal return: sync DB with live Stripe status first
-        if (fromPortal) {
-          await fetch('/api/gateway/sync-subscription');
-        }
-
-        // Get the freshest user row from the DB
-        const r    = await fetch('/api/gateway/get-me');
-        const json = await r.json();
-
-        if (json.success && json.user) {
-          // Await so the JWT cookie is fully written before we navigate
-          await update({ user: { ...json.user, auth_token: session?.user?.auth_token ?? '' } });
-        }
-      } catch {
-        // Ignore errors — the hard reload below still picks up any DB changes
-      }
-
-      // Hard navigation forces the browser to re-read the fresh JWT cookie
-      window.location.replace('/user/plan');
-    })();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCancel = async (): Promise<void> => {
     if (isProcessing) return;
@@ -120,8 +66,6 @@ const Plan = (): JSX.Element => {
       const response = await fetch('/api/gateway/user-subscription');
       const json = await response.json();
       if (json.success && json.url) {
-        // Set flag before leaving — survives the Stripe portal round-trip
-        sessionStorage.setItem('stripePortalReturn', '1');
         window.location.href = json.url;
       } else {
         toast.error(json.message || 'Could not open subscription portal', CustomToastOptions);
@@ -147,9 +91,9 @@ const Plan = (): JSX.Element => {
       const json = await response.json();
       if (json.success) {
         if (paymentMode === PaymentMode.Balance) {
-          const data = { ...session, user: { ...json.user, auth_token: session?.user?.auth_token ?? '' } };
-          update(data);
-          toast.success('Congratulation! Your account is upgraded.', CustomToastOptions);
+          // Balance payment: activate was handled server-side, do a hard reload
+          // so the session-refresh route picks up the updated DB row.
+          window.location.href = '/api/auth/session-refresh?callbackUrl=/user/plan';
         } else {
           window.location.href = json.url;
         }
@@ -208,7 +152,7 @@ const Plan = (): JSX.Element => {
                       {item.title}
                     </Typography>
                   </Box>
-                  {(initiated && ((session?.user.level && session?.user.level > UserLevel.Normal) || AppMode.Free || item.id == 0)) &&
+                  {((session?.user.level && session?.user.level > UserLevel.Normal) || AppMode.Free || item.id == 0) &&
                     <Box
                       component={Avatar}
                       bgcolor="secondary.main"
@@ -249,7 +193,7 @@ const Plan = (): JSX.Element => {
         ))}
       </Grid>
       <Box display="flex" justifyContent="center" mt="3rem">
-        {initiated && !AppMode.Free &&
+        {!AppMode.Free &&
           <LoadingButton
             variant="contained"
             color={(session?.user.level && session?.user.level >= UserLevel.Pro) ? 'warning' : 'primary'}
