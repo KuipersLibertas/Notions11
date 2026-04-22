@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
 import UserLayout from '@/views/shared/layouts/UserLayout';
 
 import { toast } from 'react-toastify';
@@ -25,8 +24,6 @@ import Confirm from '@/modals/Confirm';
 
 const Plan = (): JSX.Element => {
   const { data: session, update } = useSession();
-  const searchParams = useSearchParams();
-  const router = useRouter();
 
   const [initiated, setInitiated] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -66,45 +63,65 @@ const Plan = (): JSX.Element => {
     setInitiated(true);
   }, []);
 
-  // Refresh the session JWT whenever returning from Stripe.
-  // ?upgraded=1    → upgrade success route: fetch fresh data and update session
-  // ?from_portal=1 → portal return: sync subscription status directly from
-  //                  Stripe API, update DB, then rebuild the session JWT
+  // On mount, read query params and sessionStorage directly from the browser
+  // (avoids Next.js useSearchParams hydration quirks).
+  //
+  // ?upgraded=1    — set by the upgrade-pro success route after activatePro()
+  // ?from_portal=1 — set by the Stripe portal return_url
+  // stripePortalReturn in sessionStorage — backup flag set in handleCancel
+  //   before the browser leaves for the portal (survives the round-trip even
+  //   if Stripe strips query params from the return URL).
+  //
+  // Sequence for portal return:
+  //   1. sync-subscription  → ask Stripe for live status, update DB
+  //   2. get-me             → read fresh user row from DB
+  //   3. update()           → rewrite the NextAuth JWT cookie
+  //   4. window.location.replace → hard reload so the new cookie is read
   useEffect(() => {
-    const upgraded = searchParams.get('upgraded') === '1';
-    const fromPortal = searchParams.get('from_portal') === '1';
+    const params = new URLSearchParams(window.location.search);
+    const upgraded   = params.get('upgraded')    === '1';
+    const fromPortal = params.get('from_portal') === '1'
+                    || sessionStorage.getItem('stripePortalReturn') === '1';
+
     if (!upgraded && !fromPortal) return;
 
-    // Portal return uses sync-subscription so the DB is updated from live
-    // Stripe data before we rebuild the session — no webhook dependency.
-    const endpoint = fromPortal ? '/api/gateway/sync-subscription' : '/api/gateway/get-me';
+    // Clear the sessionStorage flag so it doesn't trigger on the next visit
+    sessionStorage.removeItem('stripePortalReturn');
 
     (async () => {
       try {
-        const r = await fetch(endpoint);
+        // Portal return: sync DB with live Stripe status first
+        if (fromPortal) {
+          await fetch('/api/gateway/sync-subscription');
+        }
+
+        // Get the freshest user row from the DB
+        const r    = await fetch('/api/gateway/get-me');
         const json = await r.json();
+
         if (json.success && json.user) {
-          // Await the session update so the JWT cookie is written before
-          // we navigate away — otherwise the component re-renders with stale data.
+          // Await so the JWT cookie is fully written before we navigate
           await update({ user: { ...json.user, auth_token: session?.user?.auth_token ?? '' } });
         }
       } catch {
-        // ignore — hard reload below will still pick up any DB changes
+        // Ignore errors — the hard reload below still picks up any DB changes
       }
-      // Hard navigation forces the browser to re-read the fresh session cookie.
+
+      // Hard navigation forces the browser to re-read the fresh JWT cookie
       window.location.replace('/user/plan');
     })();
-  }, [searchParams]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCancel = async (): Promise<void> => {
     if (isProcessing) return;
-
     setIsProcessing(true);
 
     try {
       const response = await fetch('/api/gateway/user-subscription');
       const json = await response.json();
       if (json.success && json.url) {
+        // Set flag before leaving — survives the Stripe portal round-trip
+        sessionStorage.setItem('stripePortalReturn', '1');
         window.location.href = json.url;
       } else {
         toast.error(json.message || 'Could not open subscription portal', CustomToastOptions);
@@ -118,7 +135,6 @@ const Plan = (): JSX.Element => {
 
   const handleUpgrade = async (): Promise<void> => {
     if (isProcessing) return;
-
     setIsProcessing(true);
 
     try {
@@ -126,14 +142,12 @@ const Plan = (): JSX.Element => {
         '/api/gateway/upgrade-pro',
         {
           method: 'POST',
-          body: JSON.stringify({
-            paymentMode: paymentMode
-          })
+          body: JSON.stringify({ paymentMode }),
         });
       const json = await response.json();
       if (json.success) {
         if (paymentMode === PaymentMode.Balance) {
-          const data = { ...session, user: { ...json.user, auth_token: session?.user.auth_token } };
+          const data = { ...session, user: { ...json.user, auth_token: session?.user?.auth_token ?? '' } };
           update(data);
           toast.success('Congratulation! Your account is upgraded.', CustomToastOptions);
         } else {
@@ -141,7 +155,7 @@ const Plan = (): JSX.Element => {
         }
       } else {
         toast.error(json.message, CustomToastOptions);
-      }      
+      }
     } catch (error: any) {
       toast.error(error.message, CustomToastOptions);
     } finally {
@@ -193,28 +207,8 @@ const Plan = (): JSX.Element => {
                     <Typography variant="h4" fontWeight={600}>
                       {item.title}
                     </Typography>
-                    {/* {item.id > 0&&
-                      <Box
-                        display="flex"
-                        alignItems="baseline"
-                        mt={0.5}
-                      >
-                        {'('}&nbsp;
-                        <Typography variant="h4" fontWeight={700} color="primary.main">
-                          {(item.price as any).monthly}
-                        </Typography>
-                        <Typography
-                          variant="subtitle1"
-                          color="text.secondary"
-                          fontWeight={700}
-                        >
-                          {'/mo'}
-                        </Typography>
-                        &nbsp;{')'}
-                      </Box>
-                    } */}
                   </Box>
-                  {(initiated&& ((session?.user.level && session?.user.level > UserLevel.Normal) || AppMode.Free || item.id == 0))&&
+                  {(initiated && ((session?.user.level && session?.user.level > UserLevel.Normal) || AppMode.Free || item.id == 0)) &&
                     <Box
                       component={Avatar}
                       bgcolor="secondary.main"
@@ -254,39 +248,6 @@ const Plan = (): JSX.Element => {
           </Grid>
         ))}
       </Grid>
-      {/*(session?.user.level === UserLevel.Normal && !AppMode.Free)&&
-        <Box display="flex" justifyContent="center" mt="3rem">
-          <RadioGroup
-            row
-            aria-labelledby=""
-            defaultValue="1"
-            name="expiry-group"
-            sx={{
-              alignItems: 'center',
-              columnGap: '30px',
-            }}
-            value={paymentMode}
-            onChange={(e) => setPaymentMode(parseInt(e.target.value, 10))}
-          >
-            <FormControlLabel
-              value="1"
-              control={<Radio />}
-              label="Balance"
-              sx={{
-                mr: 0
-              }}
-            />
-            <FormControlLabel
-              value="2"
-              control={<Radio />}
-              label="Credit"
-              sx={{
-                mr: 0
-              }}
-            />
-          </RadioGroup>
-        </Box>
-            */}
       <Box display="flex" justifyContent="center" mt="3rem">
         {initiated && !AppMode.Free &&
           <LoadingButton
@@ -319,7 +280,7 @@ const Plan = (): JSX.Element => {
           </Link>.
         </Typography>
       </Box>
-      {showConfirmPopup&&
+      {showConfirmPopup &&
         <Confirm
           opened={showConfirmPopup}
           onClose={() => setShowConfirmPopup(false)}

@@ -66,29 +66,39 @@ export async function upgradePro(userId: number) {
 
 // Called when the user returns from the Stripe Customer Portal.
 // Retrieves the live subscription status from Stripe and updates the DB
-// so the session reflects the true state without relying on webhooks.
+// directly by userId — more reliable than deactivatePro() which does a
+// second lookup by stripe_id and can fail silently.
 export async function syncSubscription(userId: number) {
   const { data: dbUser } = await supabase
     .from('users')
-    .select('stripe_id, subscription_id')
+    .select('stripe_id, subscription_id, is_pro')
     .eq('id', userId)
     .single();
 
-  if (dbUser?.stripe_id && dbUser?.subscription_id) {
+  if (dbUser?.subscription_id) {
     try {
       const subscription = await stripe.subscriptions.retrieve(dbUser.subscription_id);
 
-      // Deactivate if cancelled or if the user chose "cancel at period end"
-      // (we treat that as an immediate cancellation for simplicity)
       const stillActive =
         ['active', 'trialing'].includes(subscription.status) &&
         !subscription.cancel_at_period_end;
 
+      console.log(`syncSubscription userId=${userId} status=${subscription.status} cancel_at_period_end=${subscription.cancel_at_period_end} stillActive=${stillActive}`);
+
       if (!stillActive) {
-        await deactivatePro(dbUser.stripe_id);
+        await supabase
+          .from('users')
+          .update({ is_pro: 0, stripe_id: null, subscription_id: null })
+          .eq('id', userId);
+
+        await supabase
+          .from('file_list_user')
+          .update({ email_notify: false, track_ip: false, is_paid: null, expires_on: null, expire_count: 0 })
+          .eq('user_id', userId);
       }
-    } catch {
-      // Subscription ID not found in Stripe — clear stale data
+    } catch (err: any) {
+      // Subscription not found in Stripe — clear stale data
+      console.error(`syncSubscription: Stripe error for userId=${userId}:`, err.message);
       await supabase
         .from('users')
         .update({ is_pro: 0, stripe_id: null, subscription_id: null })
@@ -96,7 +106,6 @@ export async function syncSubscription(userId: number) {
     }
   }
 
-  // Return the fresh user row so the caller can rebuild the session JWT
   const { data: fresh } = await supabase
     .from('users')
     .select('*')
