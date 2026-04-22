@@ -21,24 +21,24 @@ export async function GET(
 
   const userId: number = session?.user?.id as number;
 
-  switch (params.path) {
-    case 'cancel-pro': {
-      const result = await userDb.cancelPro(userId);
-      return NextResponse.json(result);
-    }
+  try {
+    switch (params.path) {
+      case 'cancel-pro': {
+        const result = await userDb.cancelPro(userId);
+        return NextResponse.json(result);
+      }
 
-    case 'user-subscription': {
-      const result = await userDb.getSubscription(userId);
-      return NextResponse.json(result);
-    }
+      case 'user-subscription': {
+        const result = await userDb.getSubscription(userId);
+        return NextResponse.json(result);
+      }
 
-    case 'get-user-list': {
-      const data = await adminDb.getUserList();
-      return NextResponse.json(data);
-    }
+      case 'get-user-list': {
+        const data = await adminDb.getUserList();
+        return NextResponse.json(data);
+      }
 
-    case 'export-activity': {
-      try {
+      case 'export-activity': {
         const buffer = await adminDb.exportActivity();
         return new Response(buffer, {
           headers: {
@@ -46,13 +46,14 @@ export async function GET(
             'Content-Disposition': 'attachment; filename="UserDataExport.xlsx"',
           },
         });
-      } catch (error: any) {
-        return NextResponse.json({ success: false, message: error.message });
       }
-    }
 
-    default:
-      return NextResponse.json({ success: false, message: 'Unknown endpoint' }, { status: 404 });
+      default:
+        return NextResponse.json({ success: false, message: 'Unknown endpoint' }, { status: 404 });
+    }
+  } catch (error: any) {
+    console.error(`GET /api/gateway/${params.path} error:`, error.message);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
 
@@ -105,94 +106,99 @@ export async function POST(
     // Ignore empty body
   }
 
-  switch (params.path) {
-    // ── Auth ──────────────────────────────────────────────────────────────────
-    case 'forgot-password': {
-      const result = await authDb.forgotPassword(req.email);
-      return NextResponse.json(result);
-    }
-
-    case 'reset-password': {
-      const result = await authDb.resetPassword(req.token, req.newPassword);
-      return NextResponse.json(result);
-    }
-
-    case 'change-password': {
-      const result = await authDb.changePassword(userId, req.currentPassword, req.newPassword);
-      return NextResponse.json(result);
-    }
-
-    // ── Links ─────────────────────────────────────────────────────────────────
-    case 'save-link': {
-      const result = await linksDb.saveLink(userId, req as any);
-      return NextResponse.json(result);
-    }
-
-    case 'update-link': {
-      const result = await linksDb.updateLink(userId, req as any);
-      return NextResponse.json(result);
-    }
-
-    case 'delete-link': {
-      const result = await linksDb.deleteLink(userId, req.id);
-      return NextResponse.json(result);
-    }
-
-    case 'link-analytics': {
-      const result = await linksDb.getAnalytics(userId, req.id ?? req.linkId);
-      return NextResponse.json(result);
-    }
-
-    case 'validate-link': {
-      const ip =
-        request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-        request.headers.get('x-real-ip') ??
-        '';
-      const result = await linksDb.validateLink(req.linkId, req.password, ip);
-      return NextResponse.json(result);
-    }
-
-    case 'buy-link': {
-      const result = await linksDb.buyLink(userId, req.linkId);
-      return NextResponse.json(result);
-    }
-
-    // ── User ──────────────────────────────────────────────────────────────────
-    case 'upgrade-pro': {
-      const result = await userDb.upgradePro(userId);
-      return NextResponse.json(result);
-    }
-
-    case 'delete-logo': {
-      if (!session) {
-        return NextResponse.json({ success: false, message: 'Authentication is required' }, { status: 401 });
+  try {
+    switch (params.path) {
+      // ── Auth ────────────────────────────────────────────────────────────────
+      case 'forgot-password': {
+        const result = await authDb.forgotPassword(req.email);
+        return NextResponse.json(result);
       }
-      const result = await userDb.deleteLogo(userId);
-      return NextResponse.json(result);
-    }
 
-    // ── Admin ─────────────────────────────────────────────────────────────────
-    case 'update-paypal': {
-      const result = await adminDb.updatePaypal(userId, req.paypalEmail);
-      return NextResponse.json(result);
-    }
+      case 'reset-password': {
+        const result = await authDb.resetPassword(req.token, req.newPassword);
+        return NextResponse.json(result);
+      }
 
-    case 'get-earning-link-list': {
-      const result = await adminDb.getEarningLinkList(req.userId, req.period);
-      return NextResponse.json(result);
-    }
+      case 'change-password': {
+        const result = await authDb.changePassword(userId, req.currentPassword, req.newPassword);
+        return NextResponse.json(result);
+      }
 
-    case 'link-report': {
-      const result = await adminDb.linkReport(req.period, req.userName, req.url);
-      return NextResponse.json(result);
-    }
+      // ── Links ───────────────────────────────────────────────────────────────
+      case 'save-link': {
+        const result = await linksDb.saveLink(userId, req as any);
+        return NextResponse.json(result);
+      }
 
-    case 'user-analytics': {
-      const result = await adminDb.userAnalytics(req.userName, req.page, req.rowPerPage);
-      return NextResponse.json(result);
-    }
+      case 'update-link': {
+        const result = await linksDb.updateLink(userId, req as any);
+        return NextResponse.json(result);
+      }
 
-    default:
-      return NextResponse.json({ success: false, message: 'Unknown endpoint' }, { status: 404 });
+      case 'delete-link': {
+        const result = await linksDb.deleteLink(userId, req.id);
+        return NextResponse.json(result);
+      }
+
+      case 'link-analytics': {
+        const result = await linksDb.getAnalytics(userId, req.id ?? req.linkId);
+        return NextResponse.json(result);
+      }
+
+      case 'validate-link': {
+        const ip =
+          request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+          request.headers.get('x-real-ip') ??
+          '';
+        const result = await linksDb.validateLink(req.linkId, req.password, ip);
+        return NextResponse.json(result);
+      }
+
+      case 'buy-link': {
+        const result = await linksDb.buyLink(userId, req.linkId);
+        return NextResponse.json(result);
+      }
+
+      // ── User ─────────────────────────────────────────────────────────────────
+      case 'upgrade-pro': {
+        const result = await userDb.upgradePro(userId);
+        return NextResponse.json(result);
+      }
+
+      case 'delete-logo': {
+        if (!session) {
+          return NextResponse.json({ success: false, message: 'Authentication is required' }, { status: 401 });
+        }
+        const result = await userDb.deleteLogo(userId);
+        return NextResponse.json(result);
+      }
+
+      // ── Admin ────────────────────────────────────────────────────────────────
+      case 'update-paypal': {
+        const result = await adminDb.updatePaypal(userId, req.paypalEmail);
+        return NextResponse.json(result);
+      }
+
+      case 'get-earning-link-list': {
+        const result = await adminDb.getEarningLinkList(req.userId, req.period);
+        return NextResponse.json(result);
+      }
+
+      case 'link-report': {
+        const result = await adminDb.linkReport(req.period, req.userName, req.url);
+        return NextResponse.json(result);
+      }
+
+      case 'user-analytics': {
+        const result = await adminDb.userAnalytics(req.userName, req.page, req.rowPerPage);
+        return NextResponse.json(result);
+      }
+
+      default:
+        return NextResponse.json({ success: false, message: 'Unknown endpoint' }, { status: 404 });
+    }
+  } catch (error: any) {
+    console.error(`POST /api/gateway/${params.path} error:`, error.message);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
