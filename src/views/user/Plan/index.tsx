@@ -79,15 +79,21 @@ const Plan = (): JSX.Element => {
     // Stripe data before we rebuild the session — no webhook dependency.
     const endpoint = fromPortal ? '/api/gateway/sync-subscription' : '/api/gateway/get-me';
 
-    fetch(endpoint)
-      .then((r) => r.json())
-      .then((json) => {
+    (async () => {
+      try {
+        const r = await fetch(endpoint);
+        const json = await r.json();
         if (json.success && json.user) {
-          update({ user: { ...json.user, auth_token: session?.user?.auth_token ?? '' } });
+          // Await the session update so the JWT cookie is written before
+          // we navigate away — otherwise the component re-renders with stale data.
+          await update({ user: { ...json.user, auth_token: session?.user?.auth_token ?? '' } });
         }
-        router.replace('/user/plan');
-      })
-      .catch(() => router.replace('/user/plan'));
+      } catch {
+        // ignore — hard reload below will still pick up any DB changes
+      }
+      // Hard navigation forces the browser to re-read the fresh session cookie.
+      window.location.replace('/user/plan');
+    })();
   }, [searchParams]);
 
   const handleCancel = async (): Promise<void> => {
