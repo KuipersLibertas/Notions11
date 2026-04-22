@@ -66,11 +66,15 @@ const Plan = (): JSX.Element => {
     setInitiated(true);
   }, []);
 
-  // After Stripe checkout the success route redirects here with ?upgraded=1.
-  // Fetch fresh user data from the DB and rebuild the session JWT so the UI
-  // reflects the new Pro status without requiring a sign-out / sign-in.
+  // Refresh the session JWT whenever returning from Stripe (checkout or portal).
+  // ?upgraded=1  → set by the upgrade success route after activatePro()
+  // ?from_portal=1 → set by the Stripe portal return_url
+  // In both cases we fetch fresh user data from the DB so the UI reflects
+  // the latest Pro status without requiring a sign-out / sign-in.
   useEffect(() => {
-    if (searchParams.get('upgraded') !== '1') return;
+    const upgraded = searchParams.get('upgraded') === '1';
+    const fromPortal = searchParams.get('from_portal') === '1';
+    if (!upgraded && !fromPortal) return;
 
     fetch('/api/gateway/get-me')
       .then((r) => r.json())

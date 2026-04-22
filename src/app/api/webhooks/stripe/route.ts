@@ -49,6 +49,21 @@ export async function POST(request: Request) {
         break;
       }
 
+      // Fires immediately when the user cancels via the Stripe portal.
+      // The subscription status becomes 'canceled' right away even if
+      // cancel_at_period_end was set — we revoke Pro access at that point.
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as any;
+        if (subscription.status === 'canceled') {
+          const customerId = subscription.customer as string;
+          console.log(`customer.subscription.updated (canceled) — customerId=${customerId}`);
+          await deactivatePro(customerId);
+        } else {
+          console.log(`customer.subscription.updated — status=${subscription.status}, no action needed`);
+        }
+        break;
+      }
+
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
