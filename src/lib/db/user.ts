@@ -5,6 +5,36 @@ import { formatUser } from '@/lib/db/auth';
 const STRIPE_PRICE_ID = 'price_1MaIQlIiPwNsdugo6TOqqoWk';
 const SITE_URL = process.env.NEXT_PUBLIC_NOTIONS11_SITE_URL ?? 'https://notions11.com';
 
+// Returns true if a Stripe subscription should be treated as active.
+// Trialing with cancel_at_period_end=false counts as active (trial still running).
+function isSubscriptionActive(sub: { status: string; cancel_at_period_end: boolean }): boolean {
+  return ['active', 'trialing'].includes(sub.status) && !sub.cancel_at_period_end;
+}
+
+// Check whether the user's Stripe subscription is still active.
+// Used at login so the session always reflects the real state.
+// Returns the corrected is_pro value (0 or 1).
+export async function checkAndSyncProStatus(userId: number, stripeId: string | null, subscriptionId: string | null, currentIsPro: number): Promise<number> {
+  if (!stripeId || !subscriptionId) return currentIsPro;
+
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const active = isSubscriptionActive(subscription);
+    console.log(`checkAndSyncProStatus userId=${userId} status=${subscription.status} cancel_at_period_end=${subscription.cancel_at_period_end} active=${active}`);
+
+    if (!active && currentIsPro === 1) {
+      // Subscription ended — downgrade in DB (keep stripe_id/subscription_id)
+      await supabase.from('users').update({ is_pro: 0 }).eq('id', userId);
+      return 0;
+    }
+  } catch (err: any) {
+    console.error(`checkAndSyncProStatus Stripe error userId=${userId}:`, err.message);
+    // Stripe couldn't find the subscription — fail open (keep current DB value)
+  }
+
+  return currentIsPro;
+}
+
 export async function getSubscription(userId: number) {
   const { data: user } = await supabase
     .from('users')
@@ -23,13 +53,10 @@ export async function getSubscription(userId: number) {
     });
     return { success: true as const, url: portalSession.url };
   } catch (error: any) {
-    // Stale customer ID (e.g. test/live mode mismatch, or customer deleted in Stripe)
     if (error?.statusCode === 404 || error?.code === 'resource_missing') {
-      await supabase
-        .from('users')
-        .update({ stripe_id: null, subscription_id: null })
-        .eq('id', userId);
-      return { success: false as const, message: 'Subscription record not found in Stripe. Your account has been reset — please subscribe again.' };
+      // Stale customer ID — just clear it so they can resubscribe
+      await supabase.from('users').update({ stripe_id: null, subscription_id: null }).eq('id', userId);
+      return { success: false as const, message: 'Subscription record not found in Stripe. Please subscribe again.' };
     }
     throw error;
   }
@@ -65,9 +92,9 @@ export async function upgradePro(userId: number) {
 }
 
 // Called when the user returns from the Stripe Customer Portal.
-// Lists ALL subscriptions for the Stripe customer and deactivates the
-// account if none are genuinely active. Looks up by stripe_id (customer)
-// rather than subscription_id so stale subscription IDs don't block it.
+// Lists all subscriptions for the customer and sets is_pro=0 if none
+// are active. Stripe IDs are preserved — they identify the customer
+// for future re-subscriptions and status checks.
 export async function syncSubscription(userId: number) {
   const { data: dbUser, error: dbErr } = await supabase
     .from('users')
@@ -79,8 +106,6 @@ export async function syncSubscription(userId: number) {
 
   if (dbUser?.stripe_id) {
     try {
-      // List all subscriptions for this customer — more robust than
-      // retrieving by subscription_id which can be stale.
       const subscriptions = await stripe.subscriptions.list({
         customer: dbUser.stripe_id,
         limit: 10,
@@ -91,20 +116,14 @@ export async function syncSubscription(userId: number) {
         console.log(`  [${i}] id=${sub.id} status=${sub.status} cancel_at_period_end=${sub.cancel_at_period_end}`);
       });
 
-      // A subscription is "genuinely active" if its status is active/trialing
-      // AND it is not already scheduled to cancel at period end.
-      const hasActive = subscriptions.data.some(
-        (sub) =>
-          ['active', 'trialing'].includes(sub.status) &&
-          !sub.cancel_at_period_end,
-      );
-
+      const hasActive = subscriptions.data.some(isSubscriptionActive);
       console.log(`syncSubscription hasActive=${hasActive} currentIsPro=${dbUser.is_pro}`);
 
       if (!hasActive) {
+        // Only update is_pro — keep stripe_id and subscription_id
         const { error: updateErr } = await supabase
           .from('users')
-          .update({ is_pro: 0, stripe_id: null, subscription_id: null })
+          .update({ is_pro: 0 })
           .eq('id', userId);
         console.log(`syncSubscription users update error=${updateErr?.message ?? 'none'}`);
 
@@ -115,11 +134,6 @@ export async function syncSubscription(userId: number) {
       }
     } catch (err: any) {
       console.error(`syncSubscription Stripe error userId=${userId}:`, err.message);
-      // Stripe couldn't find the customer — clear the stale data
-      await supabase
-        .from('users')
-        .update({ is_pro: 0, stripe_id: null, subscription_id: null })
-        .eq('id', userId);
     }
   } else {
     console.log(`syncSubscription skipped — no stripe_id in DB for userId=${userId}`);
@@ -136,24 +150,15 @@ export async function syncSubscription(userId: number) {
 }
 
 export async function cancelPro(userId: number) {
-  await supabase
-    .from('users')
-    .update({ is_pro: 0, stripe_id: null, subscription_id: null })
-    .eq('id', userId);
+  // Only clear is_pro — keep stripe_id and subscription_id
+  await supabase.from('users').update({ is_pro: 0 }).eq('id', userId);
 
-  // Clear pro-only features from all user links
   await supabase
     .from('file_list_user')
     .update({ email_notify: false, track_ip: false, is_paid: null, expires_on: null, expire_count: 0 })
     .eq('user_id', userId);
 
-  // Return the updated user so the client can rebuild the session JWT
-  const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', userId)
-    .single();
-
+  const { data: user } = await supabase.from('users').select('*').eq('id', userId).single();
   return { success: true as const, user: user ? formatUser(user) : null };
 }
 
@@ -171,7 +176,6 @@ export async function uploadLogo(userId: number, fileBuffer: Buffer, mimeType: s
   const publicUrl = urlData.publicUrl;
 
   await supabase.from('users').update({ logo: publicUrl }).eq('id', userId);
-
   return { success: true as const, file: publicUrl };
 }
 
@@ -183,7 +187,6 @@ export async function deleteLogo(userId: number) {
     .single();
 
   if (user?.logo) {
-    // Extract storage path from public URL
     const match = user.logo.match(/logos\/(.+)$/);
     if (match) {
       await supabase.storage.from('logos').remove([match[1]]);
@@ -208,6 +211,8 @@ export async function activatePro(userId: number, stripeId: string, subscription
   });
 }
 
+// Called by the Stripe webhook (customer.subscription.deleted / updated).
+// Only sets is_pro=0 — Stripe IDs are preserved for future re-subscriptions.
 export async function deactivatePro(stripeCustomerId: string) {
   const { data: user } = await supabase
     .from('users')
@@ -217,10 +222,7 @@ export async function deactivatePro(stripeCustomerId: string) {
 
   if (!user) return;
 
-  await supabase
-    .from('users')
-    .update({ is_pro: 0, stripe_id: null, subscription_id: null })
-    .eq('id', user.id);
+  await supabase.from('users').update({ is_pro: 0 }).eq('id', user.id);
 
   await supabase
     .from('file_list_user')

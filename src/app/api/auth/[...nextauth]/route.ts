@@ -1,6 +1,7 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { login } from '@/lib/db/auth';
+import { checkAndSyncProStatus } from '@/lib/db/user';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -15,11 +16,26 @@ export const authOptions: NextAuthOptions = {
 
         try {
           const response = await login(credentials.email, credentials.password);
-          if (response.success) {
-            return { ...response.user, auth_token: '' };
+          if (!response.success) {
+            console.log(response.message);
+            return null;
           }
-          console.log(response.message);
-          return null;
+
+          const user = response.user;
+
+          // If the user has a Stripe subscription on record, verify it is still
+          // active. This ensures the session always reflects the real Pro status
+          // even if a webhook was missed or the trial expired since last login.
+          if (user.stripe_id && user.subscription_id) {
+            user.level = await checkAndSyncProStatus(
+              user.id,
+              user.stripe_id,
+              user.subscription_id,
+              user.level,
+            );
+          }
+
+          return { ...user, auth_token: '' };
         } catch (error: any) {
           console.log(error.message);
           return null;
