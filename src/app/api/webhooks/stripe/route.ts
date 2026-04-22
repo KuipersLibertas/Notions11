@@ -18,6 +18,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
+  console.log(`Stripe webhook received: ${event.type} (id: ${event.id})`);
+
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
@@ -28,8 +30,13 @@ export async function POST(request: Request) {
         const stripeCustomerId = session.customer as string;
         const subscriptionId = session.subscription as string;
 
+        console.log(`checkout.session.completed — userId=${userId} customerId=${stripeCustomerId} subscriptionId=${subscriptionId}`);
+
         if (userId && stripeCustomerId && subscriptionId) {
           await activatePro(userId, stripeCustomerId, subscriptionId);
+          console.log(`activatePro succeeded for userId=${userId}`);
+        } else {
+          console.warn('checkout.session.completed: missing required fields, skipping activation');
         }
         break;
       }
@@ -37,9 +44,13 @@ export async function POST(request: Request) {
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as any;
         const customerId = subscription.customer as string;
+        console.log(`customer.subscription.deleted — customerId=${customerId}`);
         await deactivatePro(customerId);
         break;
       }
+
+      default:
+        console.log(`Unhandled event type: ${event.type}`);
     }
   } catch (error: any) {
     console.error('Webhook handler error:', error.message);
