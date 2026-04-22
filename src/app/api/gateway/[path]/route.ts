@@ -86,16 +86,21 @@ export async function POST(
 
   // Handle multipart form data for file uploads separately
   if (params.path === 'upload-logo') {
-    const formData = await request.formData();
-    const file = formData.get('logo') as File | null;
+    try {
+      const formData = await request.formData();
+      const file = formData.get('logo') as File | null;
 
-    if (!file) {
-      return NextResponse.json({ success: false, message: 'No file provided' });
+      if (!file) {
+        return NextResponse.json({ success: false, message: 'No file provided' });
+      }
+
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const result = await userDb.uploadLogo(userId, buffer, file.type);
+      return NextResponse.json(result);
+    } catch (error: any) {
+      console.error('POST /api/gateway/upload-logo error:', error.message);
+      return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const result = await userDb.uploadLogo(userId, buffer, file.type);
-    return NextResponse.json(result);
   }
 
   // All other POST routes expect JSON

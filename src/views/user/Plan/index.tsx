@@ -283,6 +283,8 @@ const Plan = (): JSX.Element => {
           &nbsp;or&nbsp;
           <Link
             href="https://x.com/Notions_11"
+            target="_blank"
+            rel="noopener noreferrer"
             sx={{ textDecoration: 'none' }}
           >
             Twitter
