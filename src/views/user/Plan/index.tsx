@@ -87,20 +87,15 @@ const Plan = (): JSX.Element => {
     if (isProcessing) return;
 
     setIsProcessing(true);
-    
+
     try {
-      const response = await fetch('/api/gateway/cancel-pro');
+      const response = await fetch('/api/gateway/user-subscription');
       const json = await response.json();
-      if (json.success) {
-        if (json.user) {
-          const data = { ...session, user: { ...json.user, auth_token: session?.user?.auth_token ?? '' } };
-          update(data);
-        }
-        toast.success('Sorry, Your account is cancelled.', CustomToastOptions);
+      if (json.success && json.url) {
+        window.location.href = json.url;
       } else {
-        toast.error(json.message, CustomToastOptions);
+        toast.error(json.message || 'Could not open subscription portal', CustomToastOptions);
       }
-      
     } catch (error: any) {
       toast.error(error.message, CustomToastOptions);
     } finally {
@@ -286,8 +281,8 @@ const Plan = (): JSX.Element => {
             color={(session?.user.level && session?.user.level >= UserLevel.Pro) ? 'warning' : 'primary'}
             loading={isProcessing}
             onClick={() => (session?.user.level && session?.user.level >= UserLevel.Pro) ? setShowConfirmPopup(true) : handleUpgrade()}
-          > 
-            {(session?.user.level && session?.user.level >= UserLevel.Pro) ? 'Cancel Account' : 'Upgrade'}
+          >
+            {(session?.user.level && session?.user.level >= UserLevel.Pro) ? 'Manage Subscription' : 'Upgrade'}
           </LoadingButton>
         }
       </Box>
@@ -316,7 +311,7 @@ const Plan = (): JSX.Element => {
           opened={showConfirmPopup}
           onClose={() => setShowConfirmPopup(false)}
           onOk={handleCancel}
-          message="Are you sure ?<br />All link expiries, analytics and notifications will be lost."
+          message="You'll be taken to the Stripe portal to manage your subscription.<br />Cancelling there will remove your Pro access at the end of the billing period."
         />
       }
     </UserLayout>

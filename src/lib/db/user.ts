@@ -18,7 +18,7 @@ export async function getSubscription(userId: number) {
 
   const portalSession = await stripe.billingPortal.sessions.create({
     customer: user.stripe_id,
-    return_url: `${SITE_URL}/manage-subscription`,
+    return_url: `${SITE_URL}/user/plan`,
   });
 
   return { success: true as const, url: portalSession.url };
