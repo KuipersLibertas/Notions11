@@ -86,18 +86,16 @@ const Topbar = ({ menus, onSidebarOpen }: TopbarProps): JSX.Element => {
     <Box display="flex" justifyContent="space-between" alignItems="center" width={1}>
       {/* Logo */}
       <Box
-        display="flex"
         component="a"
         href="/"
         title="Notions11"
-        sx={{ textDecoration: 'none', flexShrink: 0 }}
+        sx={{ textDecoration: 'none', flexShrink: 0, display: 'flex', alignItems: 'center' }}
       >
         <Box
           component="img"
-          src={isLight ? Images.DarkLogo : Images.LightLogo}
-          height={34}
-          width={140}
-          sx={{ display: 'block' }}
+          src={Images.MainLogo}
+          sx={{ display: 'block', height: { xs: 44, md: 52 }, width: 'auto' }}
+          alt="Notions11"
         />
       </Box>
 

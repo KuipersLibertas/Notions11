@@ -22,7 +22,7 @@ import {
   ExpandLess as ExpandLessIcon,
 } from '@mui/icons-material';
 import { useTheme, alpha } from '@mui/material/styles';
-import { AppMode, ThemeMode, UserLevel } from '@/utils/constants';
+import { AppMode, UserLevel } from '@/utils/constants';
 import { Images } from '@/utils/assets';
 import { IMenu } from '@/layouts/Main/navigation';
 import { signOut, useSession } from 'next-auth/react';
@@ -100,12 +100,12 @@ const Sidebar = ({ onClose, open, variant, menus }: SidebarProps): JSX.Element =
             borderBottom: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
           }}
         >
-          <Box component="a" href="/" sx={{ textDecoration: 'none' }}>
+          <Box component="a" href="/" sx={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
             <Box
               component="img"
-              src={themeMode === ThemeMode.light ? Images.DarkLogo : Images.LightLogo}
-              height={30}
-              width={120}
+              src={Images.MainLogo}
+              sx={{ height: 44, width: 'auto', display: 'block' }}
+              alt="Notions11"
             />
           </Box>
           <ThemeToggler />
