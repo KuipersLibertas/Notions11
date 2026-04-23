@@ -1,103 +1,186 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-
 import Container from '@/components/Container';
-
 import {
   Box,
   Typography,
   Grid,
   Card,
   List,
-  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Chip,
 } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
 import { ProfileSettingMenus as menus } from '@/layouts/Main/navigation';
 
 export const UserLayout = ({ children }: { children: React.ReactNode }): JSX.Element => {
+  const theme = useTheme();
   const [activeLink, setActiveLink] = useState('');
+
   useEffect(() => {
     setActiveLink(window && window.location ? window.location.pathname : '');
   }, []);
 
-  const handleMenuClick = (url: string|undefined): void => {
+  const handleMenuClick = (url: string | undefined): void => {
     if (!url) return;
-
     window.location.href = url;
   };
 
+  const isLight = theme.palette.mode === 'light';
+
   return (
-    <Box sx={{ minHeight: 'calc(100vh - 207px)' }}>
-      <Box bgcolor="primary.dark">
-        <Container>
+    <Box sx={{ minHeight: 'calc(100vh - 200px)' }}>
+      {/* Header banner */}
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)',
+          pt: { xs: '2rem', md: '3rem' },
+          pb: { xs: '4rem', md: '5.5rem' },
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Decorative ring */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: -60,
+            right: -60,
+            width: 280,
+            height: 280,
+            borderRadius: '50%',
+            border: '56px solid rgba(255,255,255,0.06)',
+            pointerEvents: 'none',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: -80,
+            left: '30%',
+            width: 200,
+            height: 200,
+            borderRadius: '50%',
+            border: '40px solid rgba(255,255,255,0.04)',
+            pointerEvents: 'none',
+          }}
+        />
+        <Container sx={{ py: 0 }}>
           <Typography
             variant="h4"
-            fontWeight={700}
-            gutterBottom
-            sx={{ color: 'common.white' }}
+            fontWeight={800}
+            letterSpacing="-0.02em"
+            sx={{ color: '#fff', mb: 0.5 }}
           >
-            Account settings
+            Account Settings
           </Typography>
-          <Typography variant="h6" sx={{ color: 'common.white' }}>
-            Change account information and settings
+          <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.75)', fontWeight: 400 }}>
+            Manage your plan, security, and preferences
           </Typography>
         </Container>
       </Box>
-      <Container paddingTop="0 !important" marginTop={-8}>
-        <Grid container spacing={4}>
+
+      <Container
+        paddingTop="0 !important"
+        sx={{ mt: { xs: '-3rem', md: '-4rem' } }}
+      >
+        <Grid container spacing={3}>
+          {/* Sidebar nav */}
           <Grid item xs={12} md={3}>
-            <Card sx={{ boxShadow: 3 }}>
-              <List
-                disablePadding
-                sx={{
-                  display: { xs: 'inline-flex', md: 'flex' },
-                  flexDirection: { xs: 'row', md: 'column' },
-                  overflow: 'auto',
-                  flexWrap: 'nowrap',
-                  width: '100%',
-                  paddingY: { xs: 3, md: 4 },
-                  paddingX: { xs: 4, md: 0 },
-                }}
-              >
-                {menus.map((menu, index) => (
-                  <ListItem
-                    key={index}
-                    component="a"
-                    disableGutters
-                    sx={{
-                      marginRight: { xs: 2, md: 0 },
-                      flex: 0,
-                      paddingX: { xs: 0, md: 3 },
-                      borderLeft: {
-                        xs: 'none',
-                        md: '2px solid transparent',
-                      },
-                      borderLeftColor: {
-                        md:
-                          activeLink === menu.href
-                            ? 'primary.dark'
-                            : 'transparent',
-                      },
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => handleMenuClick(menu.href)}
-                  >
-                    <Typography
-                      variant="subtitle1"
-                      noWrap
-                      color={
-                        activeLink === menu.href
-                          ? 'text.primary'
-                          : 'text.secondary'
-                      }
+            <Card
+              sx={{
+                boxShadow: `0 8px 32px -8px ${alpha(theme.palette.primary.main, 0.15)}`,
+                border: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
+                borderRadius: 3,
+                overflow: 'hidden',
+              }}
+            >
+              <List disablePadding sx={{ py: 1 }}>
+                {menus.map((menu, index) => {
+                  const isActive = activeLink === menu.href;
+                  return (
+                    <ListItemButton
+                      key={index}
+                      selected={isActive}
+                      onClick={() => handleMenuClick(menu.href)}
+                      sx={{
+                        mx: 1,
+                        mb: 0.25,
+                        borderRadius: 2,
+                        py: 1.25,
+                        px: 1.5,
+                        gap: 1,
+                        transition: 'all 0.15s',
+                        '&.Mui-selected': {
+                          backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                          color: 'primary.main',
+                          '&:hover': {
+                            backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                          },
+                          '& .MuiListItemIcon-root': {
+                            color: 'primary.main',
+                          },
+                        },
+                        '&:hover': {
+                          backgroundColor: alpha(theme.palette.primary.main, 0.05),
+                        },
+                      }}
                     >
-                      {menu.title}
-                    </Typography>
-                  </ListItem>
-                ))}
+                      {menu.icon && (
+                        <ListItemIcon
+                          sx={{
+                            minWidth: 32,
+                            color: isActive ? 'primary.main' : 'text.secondary',
+                            transition: 'color 0.15s',
+                          }}
+                        >
+                          {menu.icon}
+                        </ListItemIcon>
+                      )}
+                      <ListItemText
+                        primary={menu.title}
+                        primaryTypographyProps={{
+                          fontSize: '0.875rem',
+                          fontWeight: isActive ? 600 : 500,
+                          color: isActive ? 'primary.main' : 'text.primary',
+                        }}
+                      />
+                      {menu.id === 'upload_logo' && (
+                        <Chip
+                          label="Pro"
+                          size="small"
+                          sx={{
+                            fontSize: '0.65rem',
+                            height: 18,
+                            fontWeight: 700,
+                            backgroundColor: alpha(theme.palette.secondary.main, 0.1),
+                            color: 'secondary.main',
+                            border: `1px solid ${alpha(theme.palette.secondary.main, 0.2)}`,
+                          }}
+                        />
+                      )}
+                    </ListItemButton>
+                  );
+                })}
               </List>
             </Card>
           </Grid>
+
+          {/* Main content */}
           <Grid item xs={12} md={9}>
-            <Card sx={{ boxShadow: 3, padding: 4 }}>{children}</Card>
+            <Card
+              sx={{
+                boxShadow: `0 8px 32px -8px ${alpha(theme.palette.primary.main, 0.1)}`,
+                border: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
+                borderRadius: 3,
+                p: { xs: 3, md: 4 },
+              }}
+            >
+              {children}
+            </Card>
           </Grid>
         </Grid>
       </Container>

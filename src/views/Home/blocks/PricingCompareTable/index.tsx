@@ -1,260 +1,273 @@
+'use client';
+
 import React, { useContext } from 'react';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import Container from '@/components/Container';
 import ApplicationContext from '@/contexts/ApplicationContext';
-
 import {
   Box,
   Typography,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Paper,
-  Avatar,
-  Button,
+  Chip,
+  Grid,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import { CheckIcon } from '@/utils/icons';
+import { useTheme, alpha } from '@mui/material/styles';
+import {
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+} from '@mui/icons-material';
 
 interface IFeature {
-  id: number,
-  title: string,
+  id: number;
+  title: string;
 }
 
-interface IPricing {
-  title: string,
-  price: { monthly: number } | number,
-  features: number[],
+interface IOption {
+  title: string;
+  badge?: string;
+  highlight?: boolean;
+  features: number[];
 }
 
 const PricingCompareTable = (): JSX.Element => {
   const theme = useTheme();
   const { authenticated } = useContext(ApplicationContext);
-
-  const isMdScreen = useMediaQuery(theme.breakpoints.up('md'), {
-    defaultMatches: true,
-  });
+  const isLight = theme.palette.mode === 'light';
 
   const features: IFeature[] = [
-    {
-      id: 1,
-      title: 'Passwords on Notion Links',
-    },
-    {
-      id: 2,
-      title: 'Customized URLs',
-    },
-    {
-      id: 3,
-      title: 'Expiring Links',
-    },
-    {
-      id: 4,
-      title: 'Basic Analytics on Links'
-    },
-    {
-      id: 5,
-      title: 'Advanced Analytics on Links'
-    },
-    {
-      id: 6,
-      title: 'Access Notifications'
-    },
-    {
-      id: 7,
-      title: 'Branded Download Page'
-    }
+    { id: 1, title: 'Password-protected links' },
+    { id: 2, title: 'Custom link slugs' },
+    { id: 3, title: 'Expiring links' },
+    { id: 4, title: 'Basic analytics' },
+    { id: 5, title: 'Advanced analytics + location' },
+    { id: 6, title: 'Access email notifications' },
+    { id: 7, title: 'Branded download page' },
   ];
 
-  const pricing: IPricing[] = [
+  const options: IOption[] = [
     {
-      title: 'Notions11 Pro (Now FREE!)',
-      price: 0,
-      features: [1, 2, 3, 4, 5, 6, 7],
+      title: 'Notion',
+      features: [],
     },
     {
-      title: 'Notions11 ($0)',
-      price: 0,
+      title: 'Notions11 Free',
+      badge: '$0',
       features: [1, 2, 4],
     },
     {
-      title: 'Notion ($0)',
-      price: 0,
-      features: []
+      title: 'Notions11 Pro',
+      badge: '$5/mo',
+      highlight: true,
+      features: [1, 2, 3, 4, 5, 6, 7],
     },
   ];
 
   return (
-    <Container id="compare-options" sx={{ maxWidth: { md: 1236 } }}>
-      <Box
-        sx={{
-          py: { xs: '2rem', md: '4rem' }
-        }}
-      >
-        <Box marginBottom={4}>
+    <Box
+      id="compare-options"
+      sx={{
+        backgroundColor: 'alternate.main',
+        pt: { xs: '3rem', md: '5rem' },
+        pb: { xs: '3rem', md: '5rem' },
+      }}
+    >
+      <Container sx={{ maxWidth: { md: 900 } }}>
+        {/* Section header */}
+        <Box mb={{ xs: 4, md: 5 }} textAlign="center">
+          <Chip
+            label="COMPARE"
+            size="small"
+            sx={{
+              mb: 2,
+              backgroundColor: alpha(theme.palette.primary.main, 0.08),
+              color: 'primary.main',
+              fontWeight: 700,
+              fontSize: '0.7rem',
+              letterSpacing: '0.1em',
+              borderRadius: '99px',
+              border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
+            }}
+          />
           <Typography
-            fontWeight={700}
-            variant="h4"
-            textAlign="center"
-            data-aos="fade-up"
-            data-aos-offset={100}
-            data-aos-duration="600"
-          >
-            Why add Notions11 to Notion?
-          </Typography>
-          <Box maxWidth="62rem" mx="auto">
-            <Typography
-              fontWeight={300}
-              variant="h6"
-              marginTop="0.875rem"
-              textAlign="center"
-              color="text.secondary"
-              data-aos="fade-up"
-              data-aos-offset={100}
-              data-aos-duration={600}
-            >
-              Adding Notions11 to your Notion account opens up lots of additional functionality, and can save you money.
-              See what you can do with Notions11 and Notion together, vs Notion alone.
-            </Typography>
-          </Box>
-        </Box>
-        <Box>
-          <TableContainer
-            component={Paper}
-            elevation={0}
-            data-aos={'fade-up'}
-            data-aos-delay={100}
-            data-aos-offset={100}
+            variant="h3"
+            fontWeight={800}
+            letterSpacing="-0.025em"
+            mb={1.5}
+            data-aos="fade"
             data-aos-duration={600}
           >
-            <Table aria-label="caption table" sx={{ minWidth: 600 }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Features</TableCell>
-                  {pricing.map((item: IPricing, index: number) => (
-                    <TableCell align="center" key={index}>
-                      <Typography
-                        sx={{ fontWeight: 'medium' }}
-                      >
-                        {item.title}
-                      </Typography>
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {features.map((feature: IFeature) => (
-                  <TableRow key={feature.id}>
-                    <TableCell component="th" scope="row">
-                      {feature.title}
-                    </TableCell>
-                    <TableCell align="center">
-                      <Box display="flex" justifyContent="center">
-                        {pricing[0].features.indexOf(feature.id) !== -1 ? (
-                          <Box
-                            component={Avatar}
-                            bgcolor={theme.palette.secondary.main}
-                            width={20}
-                            height={20}
-                          >
-                            <CheckIcon />
-                          </Box>
-                        ) : (
-                          ''
-                        )}
-                      </Box>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Box display="flex" justifyContent="center">
-                        {pricing[1].features.indexOf(feature.id) !== -1 ? (
-                          <Box
-                            component={Avatar}
-                            bgcolor={theme.palette.secondary.main}
-                            width={20}
-                            height={20}
-                          >
-                            <CheckIcon />
-                          </Box>
-                        ) : (
-                          ''
-                        )}
-                      </Box>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Box display="flex" justifyContent="center">
-                        {pricing[2].features.indexOf(feature.id) !== -1 ? (
-                          <Box
-                            component={Avatar}
-                            bgcolor={theme.palette.secondary.main}
-                            width={20}
-                            height={20}
-                          >
-                            <CheckIcon />
-                          </Box>
-                        ) : (
-                          ''
-                        )}
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
-        <Box
-          paddingTop="3rem"
-          paddingBottom="0.75rem"
-          data-aos="fade"
-          data-aos-duration={600}
-        >
+            Why add Notions11?
+          </Typography>
           <Typography
-            fontWeight="400"
-            component="p"
-            textAlign="center"
+            variant="body1"
+            color="text.secondary"
+            sx={{ maxWidth: 480, mx: 'auto', lineHeight: 1.65 }}
+            data-aos="fade-up"
+            data-aos-duration={600}
           >
-            Supercharge your Notion with Notions11 and Notions11 Pro!
+            Notion is great, but it doesn&apos;t protect your links. Notions11 adds the security and control layer you need.
           </Typography>
         </Box>
-        {!authenticated&&
-          <>
-            <Box
-              display="flex"
-              justifyContent="center"
-              paddingY="0.75rem"
-              data-aos="fade"
-              data-aos-duration={600}
+
+        {/* Comparison table */}
+        <Box
+          data-aos="fade-up"
+          data-aos-delay={100}
+          data-aos-offset={80}
+          data-aos-duration={600}
+          sx={{
+            borderRadius: 4,
+            border: `1.5px solid ${alpha(theme.palette.divider, 0.8)}`,
+            overflow: 'hidden',
+            boxShadow: `0 8px 32px -8px ${alpha(theme.palette.primary.main, 0.08)}`,
+            backgroundColor: 'background.paper',
+          }}
+        >
+          {/* Header row */}
+          <Grid
+            container
+            sx={{
+              borderBottom: `1.5px solid ${alpha(theme.palette.divider, 0.8)}`,
+              backgroundColor: isLight ? 'alternate.dark' : 'alternate.dark',
+            }}
+          >
+            <Grid item xs={4} sm={4}
+              sx={{ p: { xs: 1.5, sm: 2, md: 2.5 } }}
             >
-              <Button
-                variant="contained"
-                component="button"
-                color="error"
-                size="large"
-                fullWidth={isMdScreen ? false : true}
-              >
-                Create a Free Notions11 Account!
-              </Button>
-            </Box>
-            <Box
-              paddingTop="1.5rem"
-              data-aos="fade"
-              data-aos-duration={600}
-            >
-              <Typography
-                fontSize="0.875rem"
-                color="text.secondary"
-                textAlign="center"
-              >
-                <strong>Want to go Pro?</strong> Signup for a free account and upgrade from your settings page.
+              <Typography variant="body2" fontWeight={600} color="text.secondary" fontSize="0.78rem" letterSpacing="0.06em" textTransform="uppercase">
+                Feature
               </Typography>
-            </Box>
-          </>
-        }
-      </Box>
-    </Container>
+            </Grid>
+            {options.map((opt, i) => (
+              <Grid
+                item
+                xs={8 / options.length}
+                sm={8 / options.length}
+                key={i}
+                sx={{
+                  p: { xs: 1.5, sm: 2, md: 2.5 },
+                  textAlign: 'center',
+                  borderLeft: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
+                  ...(opt.highlight && {
+                    background: 'linear-gradient(135deg, rgba(37,99,235,0.06) 0%, rgba(124,58,237,0.06) 100%)',
+                  }),
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  fontWeight={700}
+                  fontSize={{ xs: '0.72rem', sm: '0.85rem' }}
+                  color={opt.highlight ? 'primary.main' : 'text.primary'}
+                >
+                  {opt.title}
+                </Typography>
+                {opt.badge && (
+                  <Chip
+                    label={opt.badge}
+                    size="small"
+                    sx={{
+                      mt: 0.5,
+                      fontSize: '0.65rem',
+                      height: 18,
+                      fontWeight: 700,
+                      borderRadius: '99px',
+                      ...(opt.highlight
+                        ? {
+                            background: 'linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)',
+                            color: '#fff',
+                          }
+                        : {
+                            backgroundColor: alpha(theme.palette.text.secondary, 0.1),
+                            color: 'text.secondary',
+                          }),
+                    }}
+                  />
+                )}
+              </Grid>
+            ))}
+          </Grid>
+
+          {/* Feature rows */}
+          {features.map((feature, fi) => (
+            <Grid
+              container
+              key={feature.id}
+              sx={{
+                borderBottom:
+                  fi < features.length - 1
+                    ? `1px solid ${alpha(theme.palette.divider, 0.5)}`
+                    : 'none',
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.primary.main, 0.02),
+                },
+              }}
+            >
+              <Grid
+                item
+                xs={4}
+                sm={4}
+                sx={{ p: { xs: 1.5, sm: 2, md: 2.5 }, display: 'flex', alignItems: 'center' }}
+              >
+                <Typography
+                  variant="body2"
+                  fontWeight={500}
+                  fontSize={{ xs: '0.78rem', sm: '0.875rem' }}
+                  color="text.primary"
+                >
+                  {feature.title}
+                </Typography>
+              </Grid>
+              {options.map((opt, oi) => (
+                <Grid
+                  item
+                  xs={8 / options.length}
+                  sm={8 / options.length}
+                  key={oi}
+                  sx={{
+                    p: { xs: 1.5, sm: 2, md: 2.5 },
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderLeft: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+                    ...(opt.highlight && {
+                      background: 'linear-gradient(135deg, rgba(37,99,235,0.04) 0%, rgba(124,58,237,0.04) 100%)',
+                    }),
+                  }}
+                >
+                  {opt.features.includes(feature.id) ? (
+                    <CheckCircleIcon
+                      sx={{
+                        fontSize: { xs: 18, sm: 20 },
+                        color: opt.highlight ? 'primary.main' : '#10b981',
+                      }}
+                    />
+                  ) : (
+                    <CancelIcon
+                      sx={{
+                        fontSize: { xs: 16, sm: 18 },
+                        color: alpha(theme.palette.text.secondary, 0.3),
+                      }}
+                    />
+                  )}
+                </Grid>
+              ))}
+            </Grid>
+          ))}
+        </Box>
+
+        {!authenticated && (
+          <Box
+            mt={4}
+            textAlign="center"
+            data-aos="fade"
+            data-aos-duration={600}
+          >
+            <Typography variant="body2" color="text.secondary">
+              <strong>Ready to supercharge Notion?</strong>&nbsp;
+              Sign up for free — no credit card required.
+            </Typography>
+          </Box>
+        )}
+      </Container>
+    </Box>
   );
 };
 

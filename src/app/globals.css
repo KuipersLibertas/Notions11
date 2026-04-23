@@ -1,64 +1,71 @@
 :root {
-  --max-width: 1236px;
+  --max-width: 1280px;
 
-  --alternate-main: #f7faff;
-  --alternate-dark: #edf1f7;
+  --alternate-main: #f8fafc;
+  --alternate-dark: #f1f5f9;
 
-  --card-shadow: rgba(23, 70, 161, .11);
-  
+  --card-shadow: rgba(37, 99, 235, 0.06);
+
   --common-black: #000;
   --common-white: #fff;
 
-  --primary-main: #377dff;
-  --primary-light: #467de3;
-  --primary-dark: #2f6ad9;
+  --primary-main: #2563eb;
+  --primary-light: #60a5fa;
+  --primary-dark: #1d4ed8;
   --contrast-text: #fff;
 
-  --secondary-light: #ffb74d;
-  --secondary-main: #f9b934;
-  --secondary-dark: #FF9800;
-  --secondary-contrast-text: rgba(0, 0, 0, 0.87);
+  --secondary-main: #7c3aed;
+  --secondary-light: #a78bfa;
+  --secondary-dark: #5b21b6;
 
-  --text-primary: #1e2022;
-  --text-secondary: #677788;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
 
-  --divider: rgba(0, 0, 0, 0.12);
+  --divider: rgba(15, 23, 42, 0.08);
 
   --background-paper: #ffffff;
   --background-default: #ffffff;
-  --background-level2: #f5f5f5;
-  --background-level1: #f5f5f5;
+  --background-level2: #f8fafc;
+  --background-level1: #f1f5f9;
+
+  /* Gradient tokens */
+  --gradient-primary: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  --gradient-brand: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --gradient-subtle: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --alternate-main: #1a2138;
-    --alternate-dark: #151a30;
+    --alternate-main: #1e293b;
+    --alternate-dark: #0f172a;
 
-    --card-shadow: rgba(0, 0, 0, .11);
-    
+    --card-shadow: rgba(0, 0, 0, 0.3);
+
     --common-black: #000;
     --common-white: #fff;
 
-    --primary-main: #1976d2;
-    --primary-light: #2196f3;
-    --primary-dark: #0d47a1;
+    --primary-main: #3b82f6;
+    --primary-light: #93c5fd;
+    --primary-dark: #2563eb;
     --contrast-text: #fff;
 
-    --secondary-light: #FFEA41;
-    --secondary-main: #FFE102;
-    --secondary-dark: #DBBE01;
-    --secondary-contrast-text: gba(0, 0, 0, 0.87);
+    --secondary-main: #8b5cf6;
+    --secondary-light: #c4b5fd;
+    --secondary-dark: #7c3aed;
 
-    --text-primary: #EEEEEF;
-    --text-secondary: #AEB0B4;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
 
-    --divider: rgba(255, 255, 255, 0.12);
+    --divider: rgba(241, 245, 249, 0.08);
 
-    --background-paper: #222B45;
-    --background-default: #222B45;
-    --background-level2: #333;
-    --background-level1: #2D3748;
+    --background-paper: #1e293b;
+    --background-default: #0f172a;
+    --background-level2: #334155;
+    --background-level1: #1e293b;
+
+    --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+    --gradient-brand: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    --gradient-subtle: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
   }
 }
 
@@ -69,37 +76,76 @@
 }
 
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
   position: absolute;
-  right: 0px;
-  top: 0px;
-  bottom: 0px;
-  background: transparent; 
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: transparent;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--primary-dark);
+  background-color: var(--primary-light);
+  border-radius: 99px;
 }
-
 
 html,
 body {
   max-width: 100vw;
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Gradient text utility */
+.gradient-text {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Link styles */
 a.link {
   color: var(--primary-main);
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+a.link:hover {
+  color: var(--primary-dark);
 }
 
 a.nav-link {
   display: flex;
   align-items: center;
   cursor: pointer;
-  padding: 0 10px;
+  padding: 6px 12px;
   text-decoration: none;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
 }
 
+a.nav-link:hover {
+  background-color: rgba(37, 99, 235, 0.06);
+}
+
+/* Card hover lift */
+.card-hover {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -12px rgba(37, 99, 235, 0.15);
+}
+
+/* Prose styles for blog content */
+.prose h1, .prose h2, .prose h3 { font-weight: 700; }
+.prose p { line-height: 1.75; }

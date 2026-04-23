@@ -3,17 +3,18 @@
 import React, { useState } from 'react';
 import * as yup from 'yup';
 import UserLayout from '../../shared/layouts/UserLayout';
-
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
 import {
   Box,
   Typography,
-  Grid,
   TextField,
   Divider,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
+import { LockOutlined, Visibility, VisibilityOff } from '@mui/icons-material';
 import { CustomToastOptions } from '@/utils/constants';
 
 interface IChangePasswordFormFields {
@@ -23,22 +24,16 @@ interface IChangePasswordFormFields {
 }
 
 const validationSchema = yup.object({
-  currentPassword: yup
-    .string()
-    .required('Please enter your password')
-    .min(8, 'The password should have at minimum length of 8'),
-  newPassword: yup
-    .string()
-    .required('Please enter your password')
-    .min(8, 'The password should have at minimum length of 8'),
-  confirmPassword: yup
-    .string()
-    .required('Please enter your password')
-    .min(8, 'The password should have at minimum length of 8'),
+  currentPassword: yup.string().required('Current password is required').min(8, 'Minimum 8 characters'),
+  newPassword: yup.string().required('New password is required').min(8, 'Minimum 8 characters'),
+  confirmPassword: yup.string().required('Please confirm your new password').min(8, 'Minimum 8 characters'),
 });
 
 const ChangePassword = (): JSX.Element => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const initialValues: IChangePasswordFormFields = {
     currentPassword: '',
@@ -50,31 +45,25 @@ const ChangePassword = (): JSX.Element => {
     if (isProcessing) return;
 
     if (values.newPassword !== values.confirmPassword) {
-      formik.touched.confirmPassword = true;
-      formik.errors.confirmPassword = 'The confirm password doesn\'t match new password';
+      formik.setFieldError('confirmPassword', "Passwords don't match");
       return;
     }
+
     setIsProcessing(true);
-
-    const data = {
-      currentPassword: values.currentPassword,
-      newPassword: values.newPassword
-    };
-    
     try {
-      const response = await fetch(
-        '/api/gateway/change-password',
-        {
-          method: 'POST',
-          body: JSON.stringify(data)
-        }
-      );
-
+      const response = await fetch('/api/gateway/change-password', {
+        method: 'POST',
+        body: JSON.stringify({
+          currentPassword: values.currentPassword,
+          newPassword: values.newPassword,
+        }),
+      });
       const json = await response.json();
       if (json.success) {
-        toast.success('The password is changed successfully', CustomToastOptions);
+        toast.success('Password changed successfully', CustomToastOptions);
+        formik.resetForm();
       } else {
-        toast.success(json.message, CustomToastOptions);
+        toast.error(json.message || 'Failed to change password', CustomToastOptions);
       }
     } catch (error: any) {
       toast.error(error.message, CustomToastOptions);
@@ -83,84 +72,91 @@ const ChangePassword = (): JSX.Element => {
     }
   };
 
-  const formik = useFormik({
-    initialValues,
-    validationSchema,
-    onSubmit
-  });
+  const formik = useFormik({ initialValues, validationSchema, onSubmit });
+
+  const PasswordField = ({
+    name,
+    label,
+    show,
+    onToggle,
+  }: {
+    name: keyof IChangePasswordFormFields;
+    label: string;
+    show: boolean;
+    onToggle: () => void;
+  }) => (
+    <TextField
+      label={label}
+      variant="outlined"
+      name={name}
+      type={show ? 'text' : 'password'}
+      fullWidth
+      value={formik.values[name]}
+      onChange={formik.handleChange}
+      error={formik.touched[name] && Boolean(formik.errors[name])}
+      // @ts-ignore
+      helperText={formik.touched[name] && formik.errors[name]}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <LockOutlined fontSize="small" sx={{ color: 'text.secondary' }} />
+          </InputAdornment>
+        ),
+        endAdornment: (
+          <InputAdornment position="end">
+            <IconButton size="small" onClick={onToggle} tabIndex={-1} edge="end">
+              {show ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+            </IconButton>
+          </InputAdornment>
+        ),
+      }}
+    />
+  );
 
   return (
     <UserLayout>
-      <Box mb="2rem">
-        <Typography
-          variant="h4"
-          sx={{
-            fontWeight: 700,
-          }}
-        >
-          Reset Password
+      <Box mb={3}>
+        <Typography variant="h5" fontWeight={700} letterSpacing="-0.02em" gutterBottom>
+          Change Password
         </Typography>
-        <Typography color="text.secondary" mt="0.5rem">
-          Fill out the fields of the form below.
+        <Typography variant="body2" color="text.secondary">
+          Choose a strong password with at least 8 characters.
         </Typography>
       </Box>
-      <Divider />
-      <Box maxWidth="30rem" mt="2rem">
+
+      <Divider sx={{ mb: 3 }} />
+
+      <Box maxWidth={400}>
         <form onSubmit={formik.handleSubmit}>
-          <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <TextField
-                label="Current Password *"
-                variant="outlined"
-                name="currentPassword"
-                type="password"
-                fullWidth
-                value={formik.values.currentPassword}
-                onChange={formik.handleChange}
-                error={formik.touched.currentPassword && Boolean(formik.errors.currentPassword)}
-                // @ts-ignore
-                helperText={formik.touched.currentPassword && formik.errors.currentPassword}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="New Password *"
-                variant="outlined"
-                name="newPassword"
-                type="password"
-                fullWidth
-                value={formik.values.newPassword}
-                onChange={formik.handleChange}
-                error={formik.touched.newPassword && Boolean(formik.errors.newPassword)}
-                // @ts-ignore
-                helperText={formik.touched.newPassword && formik.errors.newPassword}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Confirm Password *"
-                variant="outlined"
-                name="confirmPassword"
-                type="password"
-                fullWidth
-                value={formik.values.confirmPassword}
-                onChange={formik.handleChange}
-                error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
-                // @ts-ignore
-                helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
-              />
-            </Grid>
-            <Grid item container xs={12}>
-              <LoadingButton
-                size="large"
-                variant="contained"
-                type="submit"
-                loading={isProcessing}
-              >
-                Reset Password
-              </LoadingButton>
-            </Grid>
-          </Grid>
+          <Box display="flex" flexDirection="column" gap={2.5}>
+            <PasswordField
+              name="currentPassword"
+              label="Current Password"
+              show={showCurrent}
+              onToggle={() => setShowCurrent((v) => !v)}
+            />
+            <PasswordField
+              name="newPassword"
+              label="New Password"
+              show={showNew}
+              onToggle={() => setShowNew((v) => !v)}
+            />
+            <PasswordField
+              name="confirmPassword"
+              label="Confirm New Password"
+              show={showConfirm}
+              onToggle={() => setShowConfirm((v) => !v)}
+            />
+            <LoadingButton
+              size="large"
+              variant="contained"
+              type="submit"
+              loading={isProcessing}
+              sx={{ alignSelf: 'flex-start', px: 4 }}
+            >
+              Update Password
+            </LoadingButton>
+          </Box>
         </form>
       </Box>
     </UserLayout>

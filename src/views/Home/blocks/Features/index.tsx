@@ -1,35 +1,39 @@
+'use client';
+
 import React, { useCallback, useContext, useState } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Container from '@/components/Container';
 import ApplicationContext from '@/contexts/ApplicationContext';
-
 import {
   Box,
   Typography,
   Grid,
-  Card,
-  Avatar,
-  Button,
-  Chip
+  Chip,
 } from '@mui/material';
-
-import { useTheme } from '@mui/material/styles';
+import { useTheme, alpha } from '@mui/material/styles';
 import {
-  ScissorsIcon,
-  LinkIcon,
-  ChartIcon,
-  ExclamationIcon,
-  ClockIcon,
-} from '@/utils/icons';
-import { ThemeMode } from '@/utils/constants';
+  LinkOutlined,
+  BarChartOutlined,
+  NotificationsActiveOutlined,
+  TimerOutlined,
+  BrushOutlined,
+  AllInclusiveOutlined,
+} from '@mui/icons-material';
 import PlanPrice from '@/modals/PlanPrice';
+
+interface FeatureItem {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  gradient: string;
+  badge?: 'Pro' | 'New!';
+}
 
 const Features = (): JSX.Element => {
   const theme = useTheme();
   const { authenticated } = useContext(ApplicationContext);
-
   const [showPlanPricePopup, setShowPlanPricePopup] = useState<boolean>();
-  
+
   const isMdScreen = useMediaQuery(theme.breakpoints.up('md'), {
     defaultMatches: true,
   });
@@ -38,78 +42,54 @@ const Features = (): JSX.Element => {
     setShowPlanPricePopup(true);
   }, []);
 
-  const SpecialFeatureButton = ({title, type}: { title: string, type: 'filled'|'outlined' }): JSX.Element => {
-    if (type === 'filled') {
-      return (
-        <Chip
-          component="button"
-          variant={type}
-          label={title}
-          color="success"
-          sx={{
-            color: 'common.white',
-            py: '0.2rem',
-            px: '0.3rem',
-            mb: '0.35em',
-            height: 'unset',
-            textTransform: 'uppercase'
-          }}
-          onClick={() => handleShowPopup()}
-        />
-      );
-    } else {
-      return (
-        <Chip
-          component="button"
-          variant={type}
-          label={title}
-          color={theme.palette.mode === ThemeMode.dark ? 'secondary' : undefined}
-          sx={{
-            py: '0.18rem',
-            px: '0.4rem',
-            mb: '0.35em',
-            height: 'unset',
-          }}
-          onClick={() => handleShowPopup()}
-        />
-      );
-    }
-  };
+  const isLight = theme.palette.mode === 'light';
 
-  const items = [
+  const items: FeatureItem[] = [
     {
       title: 'Unlimited Links',
-      description: 'The title kind of says it all. Share as many secure links as you want.',
-      icon: (<Typography fontSize="2.5rem" color={theme.palette.background.default}>∞</Typography>)
+      description:
+        'Create as many password-protected Notion links as you need. No caps, no limits, no compromises.',
+      icon: <AllInclusiveOutlined sx={{ fontSize: 28 }} />,
+      gradient: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
     },
     {
-      title: 'Customized URLs',
-      description: 'notions11.com/randomstuff becomes notions11.com/YouAreAwesome!',
-      icon: <LinkIcon color={theme.palette.background.default} />
+      title: 'Custom URLs',
+      description:
+        'Replace random slugs with memorable links. notions11.com/your-brand looks far more professional.',
+      icon: <LinkOutlined sx={{ fontSize: 28 }} />,
+      gradient: 'linear-gradient(135deg, #0891b2 0%, #22d3ee 100%)',
     },
     {
       title: 'Access Analytics',
-      description: 'Get analytics on your Notion links, including unique users, location and # of times accessed.',
-      icon: <ChartIcon color={theme.palette.background.default} />
+      description:
+        'See who accessed your links, from where, and how often. Know your audience at a glance.',
+      icon: <BarChartOutlined sx={{ fontSize: 28 }} />,
+      gradient: 'linear-gradient(135deg, #059669 0%, #34d399 100%)',
     },
     {
-      title: 'Access Notification',
-      description: 'Enable notifications on a per-link basis to find out instantly when your links are accessed.',
-      icon: <ExclamationIcon color={theme.palette.background.default} />,
-      func: <SpecialFeatureButton title="Pro" type="outlined" />
+      title: 'Access Notifications',
+      description:
+        'Get emailed the moment someone accesses your link. Stay in the loop on a per-link basis.',
+      icon: <NotificationsActiveOutlined sx={{ fontSize: 28 }} />,
+      gradient: 'linear-gradient(135deg, #d97706 0%, #fbbf24 100%)',
+      badge: 'Pro',
     },
     {
       title: 'Expiring Links',
-      description: 'Set your links to expire whenever you want. Or after any # of downloads. Or not at all. It\'s your call.',
-      icon: <ClockIcon color={theme.palette.background.default} />,
-      func: <SpecialFeatureButton title="Pro" type="outlined" />
+      description:
+        'Set links to expire after a date, a number of downloads, or both. You stay in control.',
+      icon: <TimerOutlined sx={{ fontSize: 28 }} />,
+      gradient: 'linear-gradient(135deg, #dc2626 0%, #f87171 100%)',
+      badge: 'Pro',
     },
     {
       title: 'Your Branding',
-      description: 'Add your logo and color scheme to match your current branding.',
-      icon: <ScissorsIcon color={theme.palette.background.default} />,
-      func: <SpecialFeatureButton title="New!" type="filled" />
-    }, 
+      description:
+        'Upload your logo and apply your color scheme to the download page. Your brand, front and center.',
+      icon: <BrushOutlined sx={{ fontSize: 28 }} />,
+      gradient: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
+      badge: 'New!',
+    },
   ];
 
   return (
@@ -117,134 +97,157 @@ const Features = (): JSX.Element => {
       id="features"
       position="relative"
       sx={{
-        backgroundColor: 'alternate.main',
+        backgroundColor: 'background.paper',
+        pt: { xs: '3rem', md: '5rem' },
+        pb: { xs: '3rem', md: '5rem' },
       }}
     >
-      <Container sx={{ maxWidth: { md: 1236 } }}>
-        <Box 
-          sx={{
-            py: { xs: '2.5rem', md: '4rem' }
-          }}
-        >
-          <Box marginBottom={4}>
-            <Typography
-              fontWeight={700}
-              variant="h4"
-              textAlign="center"
-              data-aos="fade"
-              data-aos-duration={600}
-            >
-            Features Explained
-            </Typography>
-            <Typography
-              fontWeight={300}
-              variant="h6"
-              marginTop="0.875rem"
-              textAlign="center"
-              color="text.secondary"
-              data-aos="fade-up"
-              data-aos-duration="600"
-            >
-            Sometimes you want a little more security <u>and functionality</u>. Add FREE passwords to your Notion links, plus get customized URLs, expiring links, access analytics, access notifications, and more...
-            </Typography>
-          </Box>
-          <Grid container spacing={4}>
-            {items.map((item, i) => (
-              <Grid item xs={12} sm={6} md={4} key={i}>
-                <Box
-                  component={Card}
-                  padding={4}
-                  width={1}
-                  height={1}
-                  data-aos="fade-up"
-                  data-aos-delay={i * 100}
-                  data-aos-offset={100}
-                  data-aos-duration={600}
-                >
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    alignItems="center"
-                  >
-                    <Box
-                      component={Avatar}
-                      width={50}
-                      height={50}
-                      marginBottom={2}
-                      bgcolor={theme.palette.primary.main}
-                      color={theme.palette.background.paper}
-                    >
-                      {item.icon}
-                    </Box>
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      columnGap={1}
-                    >
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        sx={{ fontWeight: 500 }}
-                      >
-                        {item.title}
-                      </Typography>
-                      {item.func&& item.func}
-                    </Box>
-                    <Typography
-                      color="text.secondary"                      
-                      textAlign="center"
-                    >
-                      {item.description}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
-          {!authenticated&&
-            <Box
-              display="flex"
-              justifyContent="center"
-              paddingTop={{ xs: '1.5rem', md: '3rem' }}
-              data-aos="fade"
-              data-aos-duration={600}
-            >
-              <Button
-                variant="contained"
-                component="button"
-                color="error"
-                size="large"
-                fullWidth={isMdScreen ? false : true}
-              >
-                Create a Free Account!
-              </Button>
-            </Box>
-          }
+      <Container sx={{ maxWidth: { md: 1200 } }}>
+        {/* Section header */}
+        <Box mb={{ xs: 4, md: 6 }} textAlign="center">
+          <Chip
+            label="FEATURES"
+            size="small"
+            sx={{
+              mb: 2,
+              backgroundColor: alpha(theme.palette.primary.main, 0.08),
+              color: 'primary.main',
+              fontWeight: 700,
+              fontSize: '0.7rem',
+              letterSpacing: '0.1em',
+              borderRadius: '99px',
+              border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
+            }}
+          />
+          <Typography
+            variant="h3"
+            fontWeight={800}
+            textAlign="center"
+            data-aos="fade"
+            data-aos-duration={600}
+            sx={{
+              letterSpacing: '-0.025em',
+              mb: 1.5,
+            }}
+          >
+            Everything you need
+          </Typography>
+          <Typography
+            variant="h6"
+            color="text.secondary"
+            textAlign="center"
+            fontWeight={400}
+            sx={{ maxWidth: 560, mx: 'auto', lineHeight: 1.65, fontSize: '1rem' }}
+            data-aos="fade-up"
+            data-aos-duration={600}
+          >
+            Add passwords, analytics, expiry, and branding to any Notion link — all from one simple dashboard.
+          </Typography>
         </Box>
+
+        {/* Feature cards */}
+        <Grid container spacing={3}>
+          {items.map((item, i) => (
+            <Grid item xs={12} sm={6} md={4} key={i}>
+              <Box
+                data-aos="fade-up"
+                data-aos-delay={i * 80}
+                data-aos-offset={80}
+                data-aos-duration={600}
+                sx={{
+                  height: '100%',
+                  p: 3,
+                  borderRadius: 4,
+                  border: `1.5px solid ${alpha(theme.palette.divider, isLight ? 0.8 : 0.5)}`,
+                  backgroundColor: isLight
+                    ? 'rgba(255,255,255,0.8)'
+                    : alpha(theme.palette.background.paper, 0.6),
+                  transition: 'all 0.25s ease',
+                  cursor: 'default',
+                  '&:hover': {
+                    borderColor: alpha(theme.palette.primary.main, 0.3),
+                    boxShadow: `0 16px 40px -8px ${alpha(theme.palette.primary.main, 0.12)}, 0 4px 12px -4px rgba(0,0,0,0.05)`,
+                    transform: 'translateY(-4px)',
+                  },
+                }}
+              >
+                {/* Icon */}
+                <Box
+                  sx={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: 3,
+                    background: item.gradient,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                    mb: 2.5,
+                    boxShadow: `0 6px 16px -4px ${alpha(theme.palette.primary.main, 0.35)}`,
+                  }}
+                >
+                  {item.icon}
+                </Box>
+
+                {/* Title + badge */}
+                <Box display="flex" alignItems="center" gap={1} mb={1}>
+                  <Typography
+                    variant="h6"
+                    fontWeight={700}
+                    fontSize="1rem"
+                    letterSpacing="-0.01em"
+                  >
+                    {item.title}
+                  </Typography>
+                  {item.badge && (
+                    <Chip
+                      label={item.badge}
+                      size="small"
+                      component="button"
+                      clickable
+                      onClick={handleShowPopup}
+                      sx={{
+                        fontSize: '0.67rem',
+                        fontWeight: 700,
+                        height: 20,
+                        borderRadius: '99px',
+                        ...(item.badge === 'Pro'
+                          ? {
+                              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                              color: 'primary.main',
+                              border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                            }
+                          : {
+                              backgroundColor: alpha('#059669', 0.1),
+                              color: '#059669',
+                              border: '1px solid rgba(5,150,105,0.2)',
+                            }),
+                        cursor: 'pointer',
+                      }}
+                    />
+                  )}
+                </Box>
+
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  lineHeight={1.7}
+                  fontSize="0.875rem"
+                >
+                  {item.description}
+                </Typography>
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
       </Container>
-      <Box
-        component="svg"
-        preserveAspectRatio="none"
-        xmlns="http://www.w3.org/2000/svg"
-        x="0px"
-        y="0px"
-        viewBox="0 0 1920 100.1"
-        sx={{
-          width: '100%',
-          marginBottom: theme.spacing(-1),
-        }}
-      >
-        <path
-          fill={theme.palette.background.paper}
-          d="M0,0c0,0,934.4,93.4,1920,0v100.1H0L0,0z"
-        ></path>
-      </Box>
-      {showPlanPricePopup&&
+
+      {showPlanPricePopup && (
         <PlanPrice
           opened={showPlanPricePopup}
           onClose={() => setShowPlanPricePopup(false)}
         />
-      }
+      )}
     </Box>
   );
 };

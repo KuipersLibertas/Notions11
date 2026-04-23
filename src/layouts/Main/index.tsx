@@ -94,11 +94,22 @@ const MainLayout = ({
                 position={'sticky'}
                 sx={{
                   top: 0,
-                  backgroundColor: 'background.paper',
+                  backgroundColor: trigger
+                    ? 'rgba(255,255,255,0.85)'
+                    : 'background.paper',
+                  backdropFilter: trigger ? 'blur(20px)' : 'none',
+                  WebkitBackdropFilter: trigger ? 'blur(20px)' : 'none',
+                  borderBottom: trigger ? '1px solid rgba(15,23,42,0.06)' : 'none',
+                  transition: 'all 0.3s ease',
+                  '.dark &': {
+                    backgroundColor: trigger
+                      ? 'rgba(15,23,42,0.85)'
+                      : 'background.paper',
+                  },
                 }}
-                elevation={trigger ? 1 : 0}
+                elevation={0}
               >
-                <Container paddingY={0} sx={{ display: 'flex', alignItems: 'center', height: '76px' }}>
+                <Container paddingY={0} sx={{ display: 'flex', alignItems: 'center', height: '68px' }}>
                   <Topbar
                     onSidebarOpen={handleSidebarOpen}
                     menus={menus}

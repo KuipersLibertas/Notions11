@@ -1,20 +1,26 @@
 import React, { useState } from 'react';
 import * as yup from 'yup';
-
 import { toast } from 'react-toastify';
 import { useFormik } from 'formik';
 import {
   Box,
   Typography,
-  Grid,
   TextField,
-  Button,
   Link,
+  Divider,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-
+import {
+  EmailOutlined,
+  LockOutlined,
+  Visibility,
+  VisibilityOff,
+} from '@mui/icons-material';
 import { signIn } from 'next-auth/react';
 import { CustomToastOptions } from '@/utils/constants';
+import { alpha, useTheme } from '@mui/material/styles';
 
 const validationSchema = yup.object({
   email: yup
@@ -25,7 +31,7 @@ const validationSchema = yup.object({
   password: yup
     .string()
     .required('Please enter your password')
-    .min(8, 'The password should have at minimum length of 8'),
+    .min(8, 'Minimum 8 characters'),
 });
 
 interface ILoginFormFields {
@@ -34,152 +40,182 @@ interface ILoginFormFields {
 }
 
 type SignFormProps = {
-  onShowForgotPassword: () => void,
-  onCallback: () => void,
-}
+  onShowForgotPassword: () => void;
+  onCallback: () => void;
+};
 
 const SignInForm = ({ onShowForgotPassword, onCallback }: SignFormProps): JSX.Element => {
+  const theme = useTheme();
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const initialValues: ILoginFormFields = {
-    email: '',
-    password: '',
-  };
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  const initialValues: ILoginFormFields = { email: '', password: '' };
 
   const onSubmit = async (values: ILoginFormFields): Promise<void> => {
     if (isProcessing) return;
-    
     setIsProcessing(true);
 
     signIn('credentials', {
       redirect: false,
       email: values.email,
-      password: values.password
-    })
-      .then((res) => {
-        setIsProcessing(false);
-
-        if (res?.ok) {
-          onCallback();
-        } else {
-          toast.error('You are failed to login', CustomToastOptions);
-        }
-      });
+      password: values.password,
+    }).then((res) => {
+      setIsProcessing(false);
+      if (res?.ok) {
+        onCallback();
+      } else {
+        toast.error('Incorrect email or password', CustomToastOptions);
+      }
+    });
   };
 
-  const formik = useFormik({
-    initialValues,
-    validationSchema: validationSchema,
-    onSubmit,
-  });
-
-  const handleForgotPassword = (): void => {
-    onShowForgotPassword();
-  };
+  const formik = useFormik({ initialValues, validationSchema, onSubmit });
 
   return (
     <>
-      <Box marginBottom={4}>
+      {/* Header */}
+      <Box mb={3.5}>
         <Typography
           variant="h4"
-          sx={{
-            fontWeight: 700,
-          }}
+          fontWeight={800}
+          letterSpacing="-0.02em"
+          gutterBottom
         >
-          Sign In
+          Welcome back
         </Typography>
-        <Typography color="text.secondary" mt={1}>
-          Login to Notions11.
+        <Typography variant="body2" color="text.secondary">
+          Sign in to your Notions11 account to continue.
         </Typography>
       </Box>
+
       <form onSubmit={formik.handleSubmit}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <TextField
-              label="Email *"
-              variant="outlined"
-              name="email"
-              fullWidth
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              error={formik.touched.email && Boolean(formik.errors.email)}
-              // @ts-ignore
-              helperText={formik.touched.email && formik.errors.email}
-            />
-          </Grid>
-          <Grid item xs={12}>
+        <Box display="flex" flexDirection="column" gap={2}>
+          <TextField
+            label="Email address"
+            variant="outlined"
+            name="email"
+            type="email"
+            fullWidth
+            autoComplete="email"
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            error={formik.touched.email && Boolean(formik.errors.email)}
+            // @ts-ignore
+            helperText={formik.touched.email && formik.errors.email}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <EmailOutlined
+                    fontSize="small"
+                    sx={{ color: 'text.secondary' }}
+                  />
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <Box>
             <Box
               display="flex"
-              flexDirection={{ xs: 'column', sm: 'row' }}
-              alignItems={{ xs: 'stretched', sm: 'center' }}
-              justifyContent={'flex-end'}
-              width={1}
-              marginBottom={2}
+              justifyContent="space-between"
+              alignItems="center"
+              mb={0.75}
             >
-              <Typography variant="subtitle2">
-                <Button
-                  component="a"
-                  color="primary"
-                  onClick={handleForgotPassword}
-                  sx={{
-                    cursor: 'pointer',
-                    '&:hover': {
-                      bgcolor: 'transparent',
-                    }
-                  }}
-                >
-                  Forgot your password?
-                </Button>
+              <Typography variant="body2" fontWeight={500}>
+                Password
               </Typography>
+              <Link
+                component="button"
+                type="button"
+                onClick={onShowForgotPassword}
+                sx={{
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  color: 'primary.main',
+                  textDecoration: 'none',
+                  '&:hover': { textDecoration: 'underline' },
+                }}
+              >
+                Forgot password?
+              </Link>
             </Box>
             <TextField
-              label="Password *"
               variant="outlined"
               name="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               fullWidth
+              autoComplete="current-password"
               value={formik.values.password}
               onChange={formik.handleChange}
               error={formik.touched.password && Boolean(formik.errors.password)}
               // @ts-ignore
               helperText={formik.touched.password && formik.errors.password}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockOutlined
+                      fontSize="small"
+                      sx={{ color: 'text.secondary' }}
+                    />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={() => setShowPassword((v) => !v)}
+                      edge="end"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <VisibilityOff fontSize="small" />
+                      ) : (
+                        <Visibility fontSize="small" />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
-          </Grid>
-          <Grid item container xs={12}>
-            <Box
-              display="flex"
-              flexDirection={{ xs: 'column', sm: 'row' }}
-              alignItems={{ xs: 'stretched', sm: 'center' }}
-              justifyContent="space-between"
-              width={1}
-              maxWidth={600}
-              margin="0 auto"
-            >
-              <Box marginBottom={{ xs: 1, sm: 0 }}>
-                <Typography variant="subtitle2">
-                  Don&apos;t have an account yet?{' '}
-                  <Link
-                    href="/signup"
-                    className="link"
-                  >
-                    Sign up here.
-                  </Link>
-                </Typography>
-              </Box>
-              <LoadingButton
-                size="large"
-                variant="contained"
-                type="submit"
-                loading={isProcessing}
-              >
-                Login
-              </LoadingButton>
-            </Box>
-          </Grid>
-        </Grid>
-      </form>      
+          </Box>
+
+          <LoadingButton
+            size="large"
+            variant="contained"
+            type="submit"
+            loading={isProcessing}
+            fullWidth
+            sx={{ mt: 0.5, py: 1.4 }}
+          >
+            Sign In
+          </LoadingButton>
+        </Box>
+      </form>
+
+      <Divider sx={{ my: 2.5 }}>
+        <Typography variant="caption" color="text.secondary" fontWeight={500}>
+          OR
+        </Typography>
+      </Divider>
+
+      <Box textAlign="center">
+        <Typography variant="body2" color="text.secondary">
+          Don&apos;t have an account?{' '}
+          <Link
+            href="/signup"
+            sx={{
+              fontWeight: 700,
+              color: 'primary.main',
+              textDecoration: 'none',
+              '&:hover': { textDecoration: 'underline' },
+            }}
+          >
+            Create a free account
+          </Link>
+        </Typography>
+      </Box>
     </>
   );
-
 };
 
 export default SignInForm;
