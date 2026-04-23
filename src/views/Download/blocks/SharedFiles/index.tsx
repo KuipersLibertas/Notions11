@@ -2,15 +2,11 @@
 
 import React, { useContext, useState } from 'react';
 import ApplicationContext from '@/contexts/ApplicationContext';
-
-import {
-  Box,
-  Typography,
-  Link
-} from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import { IFile, IServerLinkDetail } from '@/types';
+import { Box, Typography, Link, Button } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
+import { OpenInNew as OpenInNewIcon, Lock as LockIcon } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
+import { IFile, IServerLinkDetail } from '@/types';
 import { toast } from 'react-toastify';
 import { CustomToastOptions } from '@/utils/constants';
 
@@ -25,16 +21,12 @@ const SharedFiles = ({ linkInfo }: { linkInfo: IServerLinkDetail }): JSX.Element
       return;
     }
     if (isProcessing) return;
-
     setIsProcessing(true);
     try {
-      const response = await fetch(
-        '/api/gateway/buy-link',
-        {
-          method: 'POST',
-          body: JSON.stringify({ linkId: linkInfo.id })
-        }
-      );
+      const response = await fetch('/api/gateway/buy-link', {
+        method: 'POST',
+        body: JSON.stringify({ linkId: linkInfo.id }),
+      });
       const json = await response.json();
       if (json.success) {
         window.location.reload();
@@ -48,74 +40,90 @@ const SharedFiles = ({ linkInfo }: { linkInfo: IServerLinkDetail }): JSX.Element
     }
   };
 
-  return (
-    <Box>
-      <Box
-        display="flex"
-        borderBottom = {`1px solid ${theme.palette.common.gray}`}
-        p={1}
-        bgcolor="background.level1"
-      >
-        <Box flex={1}>
-          <Typography variant="subtitle2" fontWeight={500} color="text.secondary">Link</Typography>
-        </Box>
-      </Box>
-      {!linkInfo.requirePaid&&
-        <Box>
-          {linkInfo.files.map((file: IFile, index: number) =>
+  if (linkInfo.requirePaid) {
+    return (
+      <Box>
+        <Box display="flex" flexDirection="column" gap={1.5} mb={3}>
+          {linkInfo.files.map((file: IFile, index: number) => (
             <Box
               key={index}
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              borderBottom = {`1px solid ${theme.palette.common.gray}`}
-              px={1}
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                border: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
+                backgroundColor: alpha(theme.palette.primary.main, 0.04),
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+              }}
             >
-              <Box flex={1}>
-                <Link
-                  sx={{ textDecoration: 'none' }}
-                  href={file.url}
-                  target="_blank"
-                >
-                  {file.url}
-                </Link>
-              </Box>
+              <LockIcon sx={{ fontSize: 18, color: 'text.secondary', flexShrink: 0 }} />
+              <Typography variant="body2" color="text.secondary" noWrap>
+                {file.url.split('?')[1] || 'Protected link'}
+              </Typography>
             </Box>
-          )}
+          ))}
         </Box>
-      }
-      {linkInfo.requirePaid&&
-        <>
-          <Box>
-            {linkInfo.files.map((file: IFile, index: number) =>
-              <Box
-                key={index}
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                borderBottom = {`1px solid ${theme.palette.common.gray}`}
-                px={1}
-              >
-                <Box flex={1}>
-                  <Typography variant="subtitle1" color="primary.main">
-                    {file.url.split('?')[1]}
-                  </Typography>
-                </Box>
-              </Box>
-            )}
-          </Box>
-          <Box display="flex" justifyContent="center" mt={2}>
-            <LoadingButton
-              variant="contained"
-              color="error"
-              loading={isProcessing}
-              onClick={handleBuy}
-            >
-              Buy Now
-            </LoadingButton>
-          </Box>
-        </>
-      }
+        <LoadingButton
+          variant="contained"
+          loading={isProcessing}
+          onClick={handleBuy}
+          fullWidth
+          size="large"
+          sx={{ py: 1.4 }}
+        >
+          Unlock — Buy Now
+        </LoadingButton>
+      </Box>
+    );
+  }
+
+  return (
+    <Box display="flex" flexDirection="column" gap={2}>
+      {linkInfo.files.map((file: IFile, index: number) => (
+        <Button
+          key={index}
+          component="a"
+          href={file.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="outlined"
+          fullWidth
+          endIcon={<OpenInNewIcon fontSize="small" />}
+          sx={{
+            justifyContent: 'space-between',
+            px: 2.5,
+            py: 1.5,
+            borderRadius: 2.5,
+            borderWidth: '1.5px',
+            textAlign: 'left',
+            textTransform: 'none',
+            fontWeight: 500,
+            fontSize: '0.875rem',
+            color: 'primary.main',
+            borderColor: alpha(theme.palette.primary.main, 0.35),
+            backgroundColor: alpha(theme.palette.primary.main, 0.03),
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            display: 'flex',
+            '&:hover': {
+              borderColor: 'primary.main',
+              backgroundColor: alpha(theme.palette.primary.main, 0.06),
+              transform: 'none',
+              boxShadow: 'none',
+            },
+          }}
+        >
+          <Typography
+            component="span"
+            noWrap
+            sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.875rem', fontWeight: 500 }}
+          >
+            {file.url}
+          </Typography>
+        </Button>
+      ))}
     </Box>
   );
 };
