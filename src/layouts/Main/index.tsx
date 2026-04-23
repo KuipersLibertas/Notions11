@@ -94,18 +94,17 @@ const MainLayout = ({
                 position={'sticky'}
                 sx={{
                   top: 0,
-                  backgroundColor: trigger
-                    ? 'rgba(255,255,255,0.85)'
-                    : 'background.paper',
+                  // Always white — logo is dark-coloured and only readable on light bg
+                  backgroundColor: trigger ? 'rgba(255,255,255,0.92)' : '#ffffff',
                   backdropFilter: trigger ? 'blur(20px)' : 'none',
                   WebkitBackdropFilter: trigger ? 'blur(20px)' : 'none',
-                  borderBottom: trigger ? '1px solid rgba(15,23,42,0.06)' : 'none',
-                  transition: 'all 0.3s ease',
-                  '.dark &': {
-                    backgroundColor: trigger
-                      ? 'rgba(15,23,42,0.85)'
-                      : 'background.paper',
-                  },
+                  borderBottom: '1px solid rgba(15,23,42,0.07)',
+                  transition: 'background-color 0.3s ease',
+                  // Force all nav text/icons to dark so they stay readable on white
+                  '& .MuiTypography-root': { color: '#0f172a' },
+                  '& .MuiSvgIcon-root': { color: '#475569' },
+                  '& .MuiIconButton-root': { color: '#475569' },
+                  '& a.nav-link span': { color: '#0f172a' },
                 }}
                 elevation={0}
               >

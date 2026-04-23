@@ -44,7 +44,7 @@ const Download = ({ linkInfo }: { linkInfo: IServerLinkDetail }): JSX.Element =>
           py: 2,
           px: 3,
           borderBottom: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
-          backgroundColor: isLight ? 'rgba(255,255,255,0.8)' : alpha(theme.palette.background.paper, 0.8),
+          backgroundColor: 'rgba(255,255,255,0.95)',
           backdropFilter: 'blur(12px)',
           position: 'relative',
           zIndex: 1,
