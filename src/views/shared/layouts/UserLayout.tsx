@@ -37,8 +37,8 @@ export const UserLayout = ({ children }: { children: React.ReactNode }): JSX.Ele
       <Box
         sx={{
           background: 'linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)',
-          pt: { xs: '2rem', md: '3rem' },
-          pb: { xs: '4rem', md: '5.5rem' },
+          pt: { xs: '1.5rem', md: '2rem' },
+          pb: { xs: '2.5rem', md: '3rem' },
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -85,7 +85,7 @@ export const UserLayout = ({ children }: { children: React.ReactNode }): JSX.Ele
 
       <Container
         paddingTop="0 !important"
-        sx={{ mt: { xs: '-3rem', md: '-4rem' } }}
+        sx={{ mt: { xs: '-2rem', md: '-2.5rem' } }}
       >
         <Grid container spacing={3}>
           {/* Sidebar nav */}
