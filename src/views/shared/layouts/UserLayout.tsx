@@ -33,60 +33,29 @@ export const UserLayout = ({ children }: { children: React.ReactNode }): JSX.Ele
 
   return (
     <Box sx={{ minHeight: 'calc(100vh - 200px)' }}>
-      {/* Header banner */}
+      {/* Header banner — compact, no overlap */}
       <Box
         sx={{
           background: 'linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)',
-          pt: { xs: '1.5rem', md: '2rem' },
-          pb: { xs: '2.5rem', md: '3rem' },
-          position: 'relative',
-          overflow: 'hidden',
+          py: { xs: '1rem', md: '1.25rem' },
+          px: 2,
         }}
       >
-        {/* Decorative ring */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: -60,
-            right: -60,
-            width: 280,
-            height: 280,
-            borderRadius: '50%',
-            border: '56px solid rgba(255,255,255,0.06)',
-            pointerEvents: 'none',
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: -80,
-            left: '30%',
-            width: 200,
-            height: 200,
-            borderRadius: '50%',
-            border: '40px solid rgba(255,255,255,0.04)',
-            pointerEvents: 'none',
-          }}
-        />
-        <Container sx={{ py: 0 }}>
+        <Box sx={{ maxWidth: 1440, mx: 'auto', px: { xs: 0, sm: 2 } }}>
           <Typography
-            variant="h4"
-            fontWeight={800}
-            letterSpacing="-0.02em"
-            sx={{ color: '#fff', mb: 0.5 }}
+            variant="h6"
+            fontWeight={700}
+            sx={{ color: '#fff', mb: 0.25, letterSpacing: '-0.01em' }}
           >
             Account Settings
           </Typography>
-          <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.75)', fontWeight: 400 }}>
+          <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.75)' }}>
             Manage your plan, security, and preferences
           </Typography>
-        </Container>
+        </Box>
       </Box>
 
-      <Container
-        paddingTop="0 !important"
-        sx={{ mt: { xs: '-2rem', md: '-2.5rem' } }}
-      >
+      <Container>
         <Grid container spacing={3}>
           {/* Sidebar nav */}
           <Grid item xs={12} md={3}>
