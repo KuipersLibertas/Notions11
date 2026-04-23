@@ -72,23 +72,6 @@ const Download = ({ linkInfo }: { linkInfo: IServerLinkDetail }): JSX.Element =>
         zIndex={1}
       >
         <Box width="100%" maxWidth={520}>
-          {/* Owner logo (Pro feature) or nothing */}
-          {linkInfo.ownerLogo && (
-            <Box display="flex" justifyContent="center" mb={3}>
-              <Box
-                component="img"
-                src={linkInfo.ownerLogo}
-                alt="Brand logo"
-                sx={{
-                  maxHeight: 80,
-                  maxWidth: 240,
-                  width: 'auto',
-                  objectFit: 'contain',
-                }}
-              />
-            </Box>
-          )}
-
           {/* Card */}
           <Box
             sx={{

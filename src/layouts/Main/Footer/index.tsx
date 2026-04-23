@@ -1,9 +1,7 @@
 import React from 'react';
 import Container from '@/components/Container';
 import { Typography, Box, Link, Grid, Divider } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import { Images } from '@/utils/assets';
-import { ThemeMode } from '@/utils/constants';
 
 const footerLinks = {
   product: [
@@ -35,7 +33,7 @@ const FooterLinkGroup = ({
     <Typography
       variant="overline"
       fontWeight={700}
-      color="text.secondary"
+      sx={{ color: '#64748b' }}
       letterSpacing="0.08em"
       fontSize="0.7rem"
       display="block"
@@ -51,10 +49,10 @@ const FooterLinkGroup = ({
           underline="none"
           sx={{
             fontSize: '0.875rem',
-            color: 'text.secondary',
+            color: '#475569',
             fontWeight: 500,
             transition: 'color 0.15s',
-            '&:hover': { color: 'primary.main' },
+            '&:hover': { color: '#2563eb' },
           }}
         >
           {link.title}
@@ -69,8 +67,8 @@ const Footer = (): JSX.Element => {
     <Box
       component="footer"
       sx={{
-        borderTop: (theme) => `1px solid ${alpha(theme.palette.divider, 0.6)}`,
-        backgroundColor: 'alternate.dark',
+        borderTop: '1px solid rgba(15,23,42,0.07)',
+        backgroundColor: '#ffffff',
       }}
     >
       <Container sx={{ py: { xs: '2.5rem', md: '3.5rem' } }}>
@@ -80,26 +78,23 @@ const Footer = (): JSX.Element => {
             <Box mb={2}>
               <Box
                 component="img"
-                src={Images.DarkLogo}
-                height={32}
-                width={130}
+                src={Images.MainLogo}
+                alt="Notions11"
                 sx={{
                   display: 'block',
-                  filter: 'none',
-                  '.dark &': { filter: 'invert(1)' },
+                  height: { xs: 36, md: 42 },
+                  width: 'auto',
                 }}
-                alt="Notions11"
               />
             </Box>
             <Typography
               variant="body2"
-              color="text.secondary"
-              sx={{ maxWidth: 240, lineHeight: 1.65 }}
+              sx={{ color: '#475569', maxWidth: 240, lineHeight: 1.65 }}
             >
               Password-protect your Notion links and share securely. Analytics, expiry, and branding included.
             </Typography>
             <Box mt={2.5}>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{ color: '#64748b' }}>
                 Looking for free file storage?&nbsp;
                 <Link
                   href="https://www.filestreams.com"
@@ -139,7 +134,7 @@ const Footer = (): JSX.Element => {
           alignItems={{ xs: 'center', sm: 'center' }}
           rowGap={1}
         >
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{ color: '#94a3b8' }}>
             &copy; {new Date().getFullYear()} Notions11. All rights reserved.
           </Typography>
           <Box display="flex" gap={0.5} alignItems="center">
@@ -152,7 +147,7 @@ const Footer = (): JSX.Element => {
                 display: 'inline-block',
               }}
             />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{ color: '#94a3b8' }}>
               All systems operational
             </Typography>
           </Box>

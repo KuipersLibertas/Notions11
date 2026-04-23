@@ -17,6 +17,9 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Password Protect Your Notion Links',
   description: '',
+  other: {
+    'google-adsense-account': 'ca-pub-3746260233604933',
+  },
 };
 
 export default function RootLayout({
@@ -28,13 +31,6 @@ export default function RootLayout({
     <Providers>
       <html lang="en">
         <body className={inter.className}>
-          {/* Google AdSense */}
-          <Script
-            async
-            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3746260233604933"
-            crossOrigin="anonymous"
-            strategy="afterInteractive"
-          />
           {/* Google Analytics — fires on every page */}
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-DVL1BCNBS0"
