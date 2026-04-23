@@ -109,7 +109,7 @@ const MainLayout = ({
                 }}
                 elevation={0}
               >
-                <Container paddingY={0} sx={{ display: 'flex', alignItems: 'center', height: '76px' }}>
+                <Container paddingY={0} sx={{ display: 'flex', alignItems: 'center', height: '96px' }}>
                   <Topbar
                     onSidebarOpen={handleSidebarOpen}
                     menus={menus}

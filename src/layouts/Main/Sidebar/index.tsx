@@ -104,7 +104,7 @@ const Sidebar = ({ onClose, open, variant, menus }: SidebarProps): JSX.Element =
             <Box
               component="img"
               src={Images.MainLogo}
-              sx={{ height: 48, width: 'auto', display: 'block' }}
+              sx={{ height: 64, width: 'auto', display: 'block' }}
               alt="Notions11"
             />
           </Box>

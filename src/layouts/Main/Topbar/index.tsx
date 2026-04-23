@@ -94,7 +94,7 @@ const Topbar = ({ menus, onSidebarOpen }: TopbarProps): JSX.Element => {
         <Box
           component="img"
           src={Images.MainLogo}
-          sx={{ display: 'block', height: { xs: 44, md: 52 }, width: 'auto' }}
+          sx={{ display: 'block', height: { xs: 60, md: 78 }, width: 'auto' }}
           alt="Notions11"
         />
       </Box>
