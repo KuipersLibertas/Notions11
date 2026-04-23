@@ -1,7 +1,7 @@
 export const Images = {
-  LightLogo: '/assets/images/newlogo1.png',
-  DarkLogo: '/assets/images/newlogo1.png',
-  MainLogo: '/assets/images/newlogo1.png',
+  LightLogo: '/assets/images/newlogo2.png',
+  DarkLogo: '/assets/images/newlogo2.png',
+  MainLogo: '/assets/images/newlogo2.png',
   GoogleDrive: '/assets/images/google-drive.png',  
   OwnerPhoto: '/assets/images/photo.jpg',
 };
