@@ -9,6 +9,13 @@ import { IUser } from '@/types';
 import { getUserList } from '@/lib/db/admin';
 import { UserLevel } from '@/utils/constants';
 
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
+
+
 const UserEarningReport = async (): Promise<JSX.Element> => {
   const session = await getServerSession(authOptions);
   

@@ -35,6 +35,7 @@ const AboutUs = (): JSX.Element => {
           height={250}
           borderRadius="100%"
           src={Images.OwnerPhoto}
+          alt="Robin Kuipers — Founder of Notions11"
         />
       </Box>
       <Box mt={1}>

@@ -1,8 +1,22 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import MainLayout from '@/layouts/Main';
 
 import { default as BlogOverviewView } from '@/views/Blog';
 import { IPost } from '@/types';
+
+export const metadata: Metadata = {
+  title: 'Blog',
+  description:
+    'Guides, tips, and updates on protecting your Notion links — learn how to add passwords, set expiry dates, track link analytics, and more.',
+  alternates: { canonical: 'https://www.notions11.com/blog' },
+  openGraph: {
+    url: 'https://www.notions11.com/blog',
+    title: 'Blog — Notions11',
+    description:
+      'Guides and tips on securing Notion links with passwords, expiry limits, and download analytics.',
+  },
+};
 
 const BlogOverview = async (): Promise<JSX.Element> => {
   let postList: IPost[] = [];
@@ -24,7 +38,7 @@ const BlogOverview = async (): Promise<JSX.Element> => {
   } catch (error) {
     console.log(error);
   }
-  
+
   return (
     <MainLayout>
       <BlogOverviewView postList={postList} />

@@ -103,6 +103,8 @@ const Topbar = ({ menus, onSidebarOpen }: TopbarProps): JSX.Element => {
         <>
           {/* Desktop nav */}
           <Box
+            component="nav"
+            aria-label="Main navigation"
             sx={{ display: { xs: 'none', md: 'flex' } }}
             alignItems="center"
             columnGap={0.5}

@@ -7,6 +7,13 @@ import { default as ManageSubScriptionView } from '@/views/ManageSubScription';
 import { redirect } from 'next/navigation';
 import { getSubscription } from '@/lib/db/user';
 
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
+
+
 const ManageSubScription = async () => {
   const session = await getServerSession(authOptions);
 
