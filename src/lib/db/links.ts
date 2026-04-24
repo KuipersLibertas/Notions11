@@ -46,22 +46,60 @@ function isValidSlug(slug: string): boolean {
   return /^[a-zA-Z0-9_-]{3,60}$/.test(slug);
 }
 
-/** SECURITY (M2): URLs must be HTTPS and from an allowed domain.
- *  Notion links are the primary use-case; Dropbox and Google Drive are also
- *  supported. Rejects javascript:, data:, and internal network addresses. */
+/** SECURITY (M2): URLs must be public HTTPS URLs.
+ *
+ * We intentionally do NOT use a domain allowlist — Notion Pro/Teams plans
+ * allow custom domains (e.g. https://docs.yourcompany.com mapped to a Notion
+ * page), so any public HTTPS URL is a legitimate input.
+ *
+ * What we DO block:
+ *  - Non-HTTPS protocols (javascript:, data:, http:, ftp:, etc.)
+ *  - Private / internal network ranges (SSRF protection):
+ *      127.x.x.x, 10.x.x.x, 172.16-31.x.x, 192.168.x.x,
+ *      169.254.x.x (cloud metadata), ::1 (IPv6 loopback),
+ *      fc00::/7 (IPv6 ULA), fe80:: (link-local)
+ *  - Reserved local hostnames: localhost, *.local, *.internal, *.localhost
+ */
 function isValidLinkUrl(url: string): boolean {
   try {
     const u = new URL(url);
+
+    // Must be HTTPS — blocks javascript:, data:, ftp:, http:, etc.
     if (u.protocol !== 'https:') return false;
-    const allowed = [
-      '.notion.site', '.notion.so',
-      '.dropbox.com', 'www.dropbox.com',
-      '.google.com', '.googleusercontent.com',
-      '.drive.google.com',
-    ];
-    return allowed.some((domain) =>
-      u.hostname === domain.replace(/^\./, '') || u.hostname.endsWith(domain)
-    );
+
+    const host = u.hostname.toLowerCase();
+
+    // Block reserved / local hostnames.
+    if (
+      host === 'localhost' ||
+      host.endsWith('.local') ||
+      host.endsWith('.internal') ||
+      host.endsWith('.localhost')
+    ) return false;
+
+    // Block private IPv4 ranges via a simple prefix / range check.
+    const ipv4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+    if (ipv4) {
+      const [, a, b] = ipv4.map(Number);
+      if (
+        a === 127 ||                          // 127.0.0.0/8  loopback
+        a === 10 ||                           // 10.0.0.0/8   private
+        a === 0 ||                            // 0.0.0.0/8    reserved
+        (a === 172 && b >= 16 && b <= 31) ||  // 172.16.0.0/12 private
+        (a === 192 && b === 168) ||           // 192.168.0.0/16 private
+        (a === 169 && b === 254)              // 169.254.0.0/16 link-local / cloud metadata
+      ) return false;
+    }
+
+    // Block IPv6 loopback and private ranges.
+    if (
+      host === '::1' ||
+      host.startsWith('fc') ||   // fc00::/7 Unique Local
+      host.startsWith('fd') ||
+      host.startsWith('fe80')    // fe80::/10 link-local
+    ) return false;
+
+    return true;
   } catch {
     return false;
   }
@@ -103,7 +141,7 @@ export async function saveLink(
   // SECURITY (M2): validate that every file URL is an allowed HTTPS URL.
   for (const f of params.files) {
     if (f.url && !isValidLinkUrl(f.url)) {
-      return { success: false as const, message: 'Invalid URL. Only HTTPS Notion, Dropbox, and Google Drive links are accepted.' };
+      return { success: false as const, message: 'Invalid URL. Please enter a valid public HTTPS link.' };
     }
   }
 
@@ -162,7 +200,7 @@ export async function updateLink(
   // SECURITY (M2): validate file URLs.
   for (const f of params.files) {
     if (f.url && !isValidLinkUrl(f.url)) {
-      return { success: false as const, message: 'Invalid URL. Only HTTPS Notion, Dropbox, and Google Drive links are accepted.' };
+      return { success: false as const, message: 'Invalid URL. Please enter a valid public HTTPS link.' };
     }
   }
 
