@@ -24,11 +24,20 @@ export async function GET(request: Request) {
 
   const userId = session.user.id as number;
   const { searchParams } = new URL(request.url);
-  const sync        = searchParams.get('sync')        === '1';
-  const callbackUrl = searchParams.get('callbackUrl') ?? '/user/plan';
+  const sync        = searchParams.get('sync') === '1';
+  const rawCallback = searchParams.get('callbackUrl') ?? '/user/plan';
 
-  console.log(`session-refresh userId=${userId} sync=${sync} callbackUrl=${callbackUrl}`);
-  const target      = new URL(callbackUrl, request.url);
+  // SECURITY: reject any callbackUrl that isn't a same-origin relative path.
+  // An absolute URL (https://evil.com) would redirect the user off-site after
+  // the fresh JWT cookie is written, leaking the session to an attacker.
+  const isSafeRedirect =
+    rawCallback.startsWith('/') &&
+    !rawCallback.startsWith('//') &&
+    !rawCallback.includes(':');
+  const callbackPath = isSafeRedirect ? rawCallback : '/user/plan';
+
+  console.log(`session-refresh userId=${userId} sync=${sync} callbackUrl=${callbackPath}`);
+  const target = new URL(callbackPath, request.url);
 
   let freshUser = null;
   try {
@@ -44,10 +53,12 @@ export async function GET(request: Request) {
     return NextResponse.redirect(target);
   }
 
-  const secret = process.env.NEXTAUTH_SECRET ?? process.env.NEXT_PUBLIC_JWT_SECRET ?? '';
+  // SECURITY: use only NEXTAUTH_SECRET — never fall back to a NEXT_PUBLIC_
+  // variable, which is embedded in the browser bundle.
+  const secret = process.env.NEXTAUTH_SECRET ?? '';
   const newToken = {
-    user:      { ...freshUser, auth_token: '' },
-    sign_out:  false,
+    user:     freshUser,
+    sign_out: false,
   };
 
   const encoded = await encode({ token: newToken, secret, maxAge: 30 * 24 * 60 * 60 });

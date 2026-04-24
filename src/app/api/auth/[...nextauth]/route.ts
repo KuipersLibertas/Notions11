@@ -35,7 +35,7 @@ export const authOptions: NextAuthOptions = {
             );
           }
 
-          return { ...user, auth_token: '' };
+          return user;
         } catch (error: any) {
           console.log(error.message);
           return null;
@@ -52,23 +52,25 @@ export const authOptions: NextAuthOptions = {
       }
     },
     jwt: async ({ token, trigger, session, user }: any) => {
-      const isSignIn = user ? true : false;
-      // console.log(token, trigger, session, user);
-      
-      if (isSignIn) {
+      // Initial sign-in: populate the token from the authorised user object.
+      if (user) {
         token.sign_out = false;
         token.user = user;
+        return token;
       }
 
+      // Client-triggered update (e.g. after logo upload/delete).
+      // SECURITY: never accept privilege fields from the client — only the logo
+      // URL may be updated this way. Level, stripe_id, subscription_id, balance,
+      // and all other fields are immutable from the client side.
       if (trigger === 'update') {
         if (session?.sign_out) {
-          token.sign_out = true;         
+          token.sign_out = true;
         } else {
           token.sign_out = false;
-        }
-
-        if (session) {
-          token.user = session.user;
+          if (session?.user?.logo !== undefined) {
+            token.user = { ...token.user, logo: session.user.logo };
+          }
         }
       }
 
@@ -78,7 +80,10 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
   },
-  secret: process.env.NEXTAUTH_SECRET ?? process.env.NEXT_PUBLIC_JWT_SECRET,
+  // SECURITY: NEXTAUTH_SECRET must be set as a server-only env var.
+  // Never fall back to a NEXT_PUBLIC_ variable — those are embedded in the
+  // client bundle and would expose the JWT signing key to any browser.
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);

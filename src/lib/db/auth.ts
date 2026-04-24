@@ -27,7 +27,6 @@ export function formatUser(user: UserRow) {
     paypal_id: user.paypal_id ?? '',
     subscription_id: user.subscription_id ?? '',
     logo: user.logo ?? '',
-    auth_token: '', // Kept for session shape compatibility; no longer used
   };
 }
 
@@ -47,7 +46,7 @@ export async function login(email: string, password: string) {
     return { success: false as const, message: 'Invalid password' };
   }
 
-  return { success: true as const, user: formatUser(user), auth_token: '' };
+  return { success: true as const, user: formatUser(user) };
 }
 
 export async function register(
@@ -91,7 +90,7 @@ export async function register(
     return { success: false as const, message: 'Registration failed' };
   }
 
-  return { success: true as const, user: formatUser(newUser), auth_token: '' };
+  return { success: true as const, user: formatUser(newUser) };
 }
 
 export async function forgotPassword(email: string) {

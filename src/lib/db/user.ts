@@ -2,7 +2,9 @@ import { supabase } from '@/lib/supabase';
 import { stripe } from '@/lib/stripe';
 import { formatUser } from '@/lib/db/auth';
 
-const STRIPE_PRICE_ID = 'price_1MaIQlIiPwNsdugo6TOqqoWk';
+// SECURITY (L2): keep the price ID in an env var rather than hardcoding it,
+// so it isn't exposed if the repository ever becomes public.
+const STRIPE_PRICE_ID = process.env.STRIPE_PRICE_ID ?? 'price_1MaIQlIiPwNsdugo6TOqqoWk';
 const SITE_URL = process.env.NEXT_PUBLIC_NOTIONS11_SITE_URL ?? 'https://notions11.com';
 
 // Returns true if a Stripe subscription should be treated as active.

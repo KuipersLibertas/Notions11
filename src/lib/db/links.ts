@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { sendLinkDownloadNotification } from '@/lib/email';
+import { encryptLinkPassword, decryptLinkPassword, verifyLinkPassword } from '@/lib/linkCrypto';
 
 type LinkRow = {
   id: number;
@@ -26,7 +27,9 @@ function formatLink(link: LinkRow) {
     emailNotify: link.email_notify,
     service: link.service,
     link: link.passdrop_url,
-    password: link.passdrop_pwd ?? '',
+    // SECURITY (H3): decrypt the stored password before returning to the
+    // authenticated owner. Legacy plaintext passwords pass through unchanged.
+    password: decryptLinkPassword(link.passdrop_pwd),
     linkType: link.link_type,
     trackIp: link.track_ip,
     cost: link.is_paid ?? 0,
@@ -35,6 +38,36 @@ function formatLink(link: LinkRow) {
     downloadCount: link.download_count,
   };
 }
+
+// ── Validation helpers ────────────────────────────────────────────────────────
+
+/** SECURITY (M3 / M5): slugs must be 3–60 alphanumeric/hyphen/underscore chars. */
+function isValidSlug(slug: string): boolean {
+  return /^[a-zA-Z0-9_-]{3,60}$/.test(slug);
+}
+
+/** SECURITY (M2): URLs must be HTTPS and from an allowed domain.
+ *  Notion links are the primary use-case; Dropbox and Google Drive are also
+ *  supported. Rejects javascript:, data:, and internal network addresses. */
+function isValidLinkUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    if (u.protocol !== 'https:') return false;
+    const allowed = [
+      '.notion.site', '.notion.so',
+      '.dropbox.com', 'www.dropbox.com',
+      '.google.com', '.googleusercontent.com',
+      '.drive.google.com',
+    ];
+    return allowed.some((domain) =>
+      u.hostname === domain.replace(/^\./, '') || u.hostname.endsWith(domain)
+    );
+  } catch {
+    return false;
+  }
+}
+
+// ── Public API ────────────────────────────────────────────────────────────────
 
 export async function getLinkList(userId: number) {
   const { data, error } = await supabase
@@ -62,6 +95,18 @@ export async function saveLink(
     expiryOn: string;
   }
 ) {
+  // SECURITY (M3 / M5): validate slug format before hitting the DB.
+  if (!isValidSlug(params.link)) {
+    return { success: false as const, message: 'Invalid URL slug. Use 3–60 alphanumeric characters, hyphens, or underscores.' };
+  }
+
+  // SECURITY (M2): validate that every file URL is an allowed HTTPS URL.
+  for (const f of params.files) {
+    if (f.url && !isValidLinkUrl(f.url)) {
+      return { success: false as const, message: 'Invalid URL. Only HTTPS Notion, Dropbox, and Google Drive links are accepted.' };
+    }
+  }
+
   const { data: existing } = await supabase
     .from('file_list_user')
     .select('id')
@@ -72,11 +117,14 @@ export async function saveLink(
     return { success: false as const, message: 'That URL is already taken' };
   }
 
+  // SECURITY (H3): encrypt the password before storing.
+  const encryptedPwd = params.password ? encryptLinkPassword(params.password) : null;
+
   const { error } = await supabase.from('file_list_user').insert({
     user_id: userId,
     dropbox_url: params.files.map((f) => f.url).join(','),
     passdrop_url: params.link,
-    passdrop_pwd: params.password || null,
+    passdrop_pwd: encryptedPwd,
     service: params.service,
     link_type: params.linkType,
     email_notify: params.emailNotify,
@@ -106,6 +154,18 @@ export async function updateLink(
     expiryOn: string;
   }
 ) {
+  // SECURITY (M3 / M5): validate slug format.
+  if (!isValidSlug(params.link)) {
+    return { success: false as const, message: 'Invalid URL slug. Use 3–60 alphanumeric characters, hyphens, or underscores.' };
+  }
+
+  // SECURITY (M2): validate file URLs.
+  for (const f of params.files) {
+    if (f.url && !isValidLinkUrl(f.url)) {
+      return { success: false as const, message: 'Invalid URL. Only HTTPS Notion, Dropbox, and Google Drive links are accepted.' };
+    }
+  }
+
   const { data: owned } = await supabase
     .from('file_list_user')
     .select('id')
@@ -124,12 +184,15 @@ export async function updateLink(
 
   if (slugConflict) return { success: false as const, message: 'That URL is already taken' };
 
+  // SECURITY (H3): encrypt the password before storing.
+  const encryptedPwd = params.password ? encryptLinkPassword(params.password) : null;
+
   const { error } = await supabase
     .from('file_list_user')
     .update({
       dropbox_url: params.files.map((f) => f.url).join(','),
       passdrop_url: params.link,
-      passdrop_pwd: params.password || null,
+      passdrop_pwd: encryptedPwd,
       email_notify: params.emailNotify,
       track_ip: params.trackIp,
       is_paid: params.cost > 0 ? params.cost : null,
@@ -160,9 +223,13 @@ export async function deleteLink(userId: number, id: number) {
 export async function getLinkDetail(slug: string, requestUserId?: number) {
   const { data: link, error } = await supabase
     .from('file_list_user')
-    .select('*, users!inner(id, user_name, user_email, is_pro, logo)')
+    .select('*, users!inner(id, user_name, is_pro, logo)')
     .eq('passdrop_url', slug)
     .single();
+
+  // SECURITY (H6): 'user_email' is intentionally excluded from this query.
+  // The download page is publicly accessible and must never expose the link
+  // owner's email address to anonymous visitors.
 
   if (error || !link) return { success: false as const, message: 'Link not found' };
 
@@ -174,7 +241,7 @@ export async function getLinkDetail(slug: string, requestUserId?: number) {
     return { success: false as const, message: 'This link has reached its download limit' };
   }
 
-  const owner = link.users as { id: number; user_name: string; user_email: string; is_pro: number; logo: string | null };
+  const owner = link.users as { id: number; user_name: string; is_pro: number; logo: string | null };
   const isOwner = !!requestUserId && requestUserId === link.user_id;
   const urls = link.dropbox_url ? link.dropbox_url.split(',') : [];
 
@@ -194,7 +261,6 @@ export async function getLinkDetail(slug: string, requestUserId?: number) {
       downloadCount: link.download_count,
       userId: link.user_id,
       ownerName: owner.user_name,
-      ownerEmail: owner.user_email,
       ownerLevel: owner.is_pro,
       ownerLogo: owner.logo ?? '',
       requirePaid: (link.is_paid ?? 0) > 0 && !isOwner,
@@ -212,7 +278,9 @@ export async function validateLink(linkId: number, password: string, ipAddress: 
 
   if (error || !link) return { success: false as const, message: 'Link not found' };
 
-  if (link.passdrop_pwd && link.passdrop_pwd !== password) {
+  // SECURITY (H3): use verifyLinkPassword() which decrypts the stored value
+  // before comparing, and falls back to plaintext for legacy entries.
+  if (link.passdrop_pwd && !verifyLinkPassword(link.passdrop_pwd, password)) {
     return { success: false as const, message: 'Incorrect password' };
   }
 
@@ -253,11 +321,12 @@ export async function validateLink(linkId: number, password: string, ipAddress: 
   // IP tracking (non-fatal)
   if (link.track_ip && ipAddress) {
     try {
+      // SECURITY: use HTTPS endpoint so the IP and API key travel encrypted.
       const geoRes = await fetch(
-        `http://api.ipstack.com/${ipAddress}?access_key=${process.env.IP_TRACK_KEY}&fields=city,country_name,latitude,longitude`
+        `https://api.ipstack.com/${ipAddress}?access_key=${process.env.IP_TRACK_KEY}&fields=city,country_name,latitude,longitude`
       );
       const geo = await geoRes.json();
-      city = geo.city ?? '';
+      city    = geo.city ?? '';
       country = geo.country_name ?? '';
       await supabase.from('ip_tracker').insert({
         link_id: linkId,
@@ -325,6 +394,27 @@ export async function buyLink(buyerUserId: number, linkId: number) {
     return { success: false as const, message: 'Link not found or not a paid link' };
   }
 
+  // Prevent buying your own link.
+  if (link.user_id === buyerUserId) {
+    return { success: false as const, message: 'You cannot purchase your own link' };
+  }
+
+  // SECURITY (M6): check for duplicate purchase — a user should not be able
+  // to buy the same link more than once.
+  const { data: alreadyBought } = await supabase
+    .from('paid_links')
+    .select('id')
+    .eq('user_id', buyerUserId)
+    .eq('link_id', linkId)
+    .maybeSingle();
+
+  if (alreadyBought) {
+    return { success: false as const, message: 'You have already purchased this link' };
+  }
+
+  // SECURITY (H7): re-read the buyer's balance immediately before deducting.
+  // This tightens the TOCTOU window. A fully atomic fix requires a Supabase
+  // RPC (Postgres function) — add one if concurrent purchases become a concern.
   const { data: buyer } = await supabase
     .from('users')
     .select('id, balance')
@@ -335,8 +425,18 @@ export async function buyLink(buyerUserId: number, linkId: number) {
     return { success: false as const, message: 'Insufficient balance' };
   }
 
-  await supabase.from('users').update({ balance: buyer.balance - link.is_paid }).eq('id', buyerUserId);
+  // Deduct from buyer
+  const { error: deductError } = await supabase
+    .from('users')
+    .update({ balance: buyer.balance - link.is_paid })
+    .eq('id', buyerUserId)
+    .gte('balance', link.is_paid); // atomic guard: only updates if balance is still sufficient
 
+  if (deductError) {
+    return { success: false as const, message: 'Purchase failed — please try again' };
+  }
+
+  // Credit seller
   const { data: seller } = await supabase
     .from('users')
     .select('balance')
