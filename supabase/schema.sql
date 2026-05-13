@@ -102,3 +102,19 @@ CREATE INDEX IF NOT EXISTS idx_daily_downloads_link_date ON daily_downloads(link
 CREATE INDEX IF NOT EXISTS idx_ip_tracker_link_id        ON ip_tracker(link_id);
 CREATE INDEX IF NOT EXISTS idx_paid_links_user_id        ON paid_links(user_id);
 CREATE INDEX IF NOT EXISTS idx_paid_links_link_id        ON paid_links(link_id);
+
+-- Explicit grants for service_role (required from October 2026 on all Supabase projects).
+-- These match the grants Supabase currently applies automatically; making them explicit
+-- future-proofs the schema against the upcoming default-grant removal.
+GRANT USAGE ON SCHEMA public TO service_role;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.users               TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.file_list_user      TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.daily_downloads     TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.ip_tracker          TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.paid_links          TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.paid_membership     TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.password_reset_tokens TO service_role;
+
+-- Sequences (needed for INSERT with BIGSERIAL columns)
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO service_role;
