@@ -8,6 +8,7 @@ type UserRow = {
   user_name: string;
   user_email: string;
   password_hash: string;
+  password_version: number;
   is_pro: number;
   stripe_id: string | null;
   subscription_id: string | null;
@@ -27,6 +28,7 @@ export function formatUser(user: UserRow) {
     paypal_id: user.paypal_id ?? '',
     subscription_id: user.subscription_id ?? '',
     logo: user.logo ?? '',
+    password_version: user.password_version ?? 1,
   };
 }
 
@@ -141,8 +143,15 @@ export async function resetPassword(token: string, newPassword: string) {
     return { success: false as const, message: 'Token has expired' };
   }
 
+  const { data: userRow } = await supabase
+    .from('users')
+    .select('password_version')
+    .eq('id', tokenRow.user_id)
+    .single();
+
   const password_hash = await bcrypt.hash(newPassword, 10);
-  await supabase.from('users').update({ password_hash }).eq('id', tokenRow.user_id);
+  const newVersion = (userRow?.password_version ?? 1) + 1;
+  await supabase.from('users').update({ password_hash, password_version: newVersion }).eq('id', tokenRow.user_id);
   await supabase.from('password_reset_tokens').delete().eq('id', tokenRow.id);
 
   return { success: true as const, message: 'Password updated successfully' };
@@ -155,7 +164,7 @@ export async function changePassword(
 ) {
   const { data: user } = await supabase
     .from('users')
-    .select('password_hash')
+    .select('password_hash, password_version')
     .eq('id', userId)
     .single();
 
@@ -165,7 +174,8 @@ export async function changePassword(
   if (!valid) return { success: false as const, message: 'Current password is incorrect' };
 
   const password_hash = await bcrypt.hash(newPassword, 10);
-  await supabase.from('users').update({ password_hash }).eq('id', userId);
+  const newVersion = (user.password_version ?? 1) + 1;
+  await supabase.from('users').update({ password_hash, password_version: newVersion }).eq('id', userId);
 
   return { success: true as const };
 }

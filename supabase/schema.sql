@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   user_name        VARCHAR       NOT NULL,
   user_email       VARCHAR       UNIQUE NOT NULL,
   password_hash    VARCHAR       NOT NULL,
+  password_version INT           NOT NULL DEFAULT 1, -- incremented on every password change to invalidate old sessions
   is_pro           INT           DEFAULT 0,    -- 0=normal, 1=pro, 2=admin
   stripe_id        VARCHAR,
   subscription_id  VARCHAR,
