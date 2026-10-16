@@ -6,36 +6,20 @@ import { default as BlogDetailView } from '@/views/Blog/Detail';
 import { redirect } from 'next/navigation';
 import { IPost } from '@/types';
 import { Metadata } from 'next';
+import posts from '@/lib/blog/posts';
 
 const SITE_URL = 'https://www.notions11.com';
 
-const getPost = async (id: string): Promise<IPost|null> => {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_GHOST_SITE_URL}/ghost/api/content/posts/slug/${id}/?key=${process.env.NEXT_PUBLIC_GHOST_API_KEY}&include=tags,authors`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      }
-    );
+function getPost(id: string): IPost | null {
+  return posts.find((p) => p.slug === id) ?? null;
+}
 
-    const json = await response.json();
-    if (json.posts.length === 0) {
-      redirect('/');
-    }
+export function generateStaticParams() {
+  return posts.map((p) => ({ id: p.slug }));
+}
 
-    return json.posts[0];
-  } catch (error) {
-    console.log(error);
-  }
-  return null;
-};
-
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const post: IPost|null = await getPost(params.id);
+export function generateMetadata({ params }: { params: { id: string } }): Metadata {
+  const post: IPost|null = getPost(params.id);
   const canonicalUrl = `${SITE_URL}/blog/${post?.slug ?? params.id}`;
 
   return {
@@ -64,12 +48,12 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-const BlogDetail = async ({ params }: { params: { id: string } }): Promise<JSX.Element> => {
+const BlogDetail = ({ params }: { params: { id: string } }): JSX.Element => {
   if (!params.id) {
     redirect('/');
   }
 
-  const post: IPost|null = await getPost(params.id);
+  const post: IPost|null = getPost(params.id);
   const canonicalUrl = `${SITE_URL}/blog/${post?.slug ?? params.id}`;
 
   const jsonLd = post ? {

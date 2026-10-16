@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import MainLayout from '@/layouts/Main';
 
 import { default as BlogOverviewView } from '@/views/Blog';
-import { IPost } from '@/types';
+import posts from '@/lib/blog/posts';
 
 export const metadata: Metadata = {
   title: 'Blog',
@@ -18,30 +18,10 @@ export const metadata: Metadata = {
   },
 };
 
-const BlogOverview = async (): Promise<JSX.Element> => {
-  let postList: IPost[] = [];
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_GHOST_SITE_URL}/ghost/api/content/posts/?key=${process.env.NEXT_PUBLIC_GHOST_API_KEY}&include=tags,authors&filter=tag:Notions11`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      }
-    );
-
-    const json = await response.json();
-    console.log(json.posts);
-    postList = json.posts;
-  } catch (error) {
-    console.log(error);
-  }
-
+const BlogOverview = (): JSX.Element => {
   return (
     <MainLayout>
-      <BlogOverviewView postList={postList} />
+      <BlogOverviewView postList={posts} />
     </MainLayout>
   );
 };
