@@ -10,6 +10,10 @@ import { IFile, IServerLinkDetail } from '@/types';
 import { toast } from 'react-toastify';
 import { CustomToastOptions } from '@/utils/constants';
 
+declare global {
+  function gtag(...args: unknown[]): void;
+}
+
 const SharedFiles = ({ linkInfo }: { linkInfo: IServerLinkDetail }): JSX.Element => {
   const theme = useTheme();
   const { authenticated, setShowSignIn } = useContext(ApplicationContext);
@@ -78,6 +82,12 @@ const SharedFiles = ({ linkInfo }: { linkInfo: IServerLinkDetail }): JSX.Element
     );
   }
 
+  const trackDownload = (url: string): void => {
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'file_download', { link_url: url });
+    }
+  };
+
   return (
     <Box display="flex" flexDirection="column" gap={2}>
       {linkInfo.files.map((file: IFile, index: number) => (
@@ -87,6 +97,7 @@ const SharedFiles = ({ linkInfo }: { linkInfo: IServerLinkDetail }): JSX.Element
           href={file.url}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackDownload(file.url)}
           variant="outlined"
           fullWidth
           endIcon={<OpenInNewIcon fontSize="small" />}

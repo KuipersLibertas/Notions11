@@ -41,3 +41,18 @@ Thumbs.db
 
 # Laravel backend vendor (large, not needed on Vercel)
 backend/app/vendor/
+
+# One-off database exports — never commit user data
+*.csv
+logs.zip
+
+# Migration scripts and stale root images
+migrate.mjs
+migrate-logos.mjs
+newlogo1.png
+newlogo2.png
+newlogo3.png
+screenshot.jpg
+favicon.jpg
+logos.zip
+upload-blog-images.mjs

@@ -450,43 +450,19 @@ export async function buyLink(buyerUserId: number, linkId: number) {
     return { success: false as const, message: 'You have already purchased this link' };
   }
 
-  // SECURITY (H7): re-read the buyer's balance immediately before deducting.
-  // This tightens the TOCTOU window. A fully atomic fix requires a Supabase
-  // RPC (Postgres function) — add one if concurrent purchases become a concern.
-  const { data: buyer } = await supabase
-    .from('users')
-    .select('id, balance')
-    .eq('id', buyerUserId)
-    .single();
+  // Atomic deduction via DB function — eliminates the TOCTOU race where two
+  // concurrent requests both read the same balance and each pass the JS-level
+  // check, resulting in a double-spend. Returns false if balance is insufficient.
+  const { data: deducted, error: deductError } = await supabase
+    .rpc('deduct_user_balance', { p_user_id: buyerUserId, p_amount: link.is_paid });
 
-  if (!buyer || buyer.balance < link.is_paid) {
-    return { success: false as const, message: 'Insufficient balance' };
-  }
-
-  // Deduct from buyer
-  const { error: deductError } = await supabase
-    .from('users')
-    .update({ balance: buyer.balance - link.is_paid })
-    .eq('id', buyerUserId)
-    .gte('balance', link.is_paid); // atomic guard: only updates if balance is still sufficient
-
-  if (deductError) {
+  if (deductError || !deducted) {
     return { success: false as const, message: 'Purchase failed — please try again' };
   }
 
-  // Credit seller
-  const { data: seller } = await supabase
-    .from('users')
-    .select('balance')
-    .eq('id', link.user_id)
-    .single();
-
-  if (seller) {
-    await supabase
-      .from('users')
-      .update({ balance: seller.balance + link.is_paid })
-      .eq('id', link.user_id);
-  }
+  // Atomic credit to seller (SET balance = balance + amount — no read-modify-write).
+  await supabase
+    .rpc('credit_user_balance', { p_user_id: link.user_id, p_amount: link.is_paid });
 
   await supabase.from('paid_links').insert({
     user_id: buyerUserId,
