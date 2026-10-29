@@ -71,16 +71,6 @@ export async function register(
     return { success: false as const, message: 'Email already in use' };
   }
 
-  const { data: existingName } = await supabase
-    .from('users')
-    .select('id')
-    .eq('user_name', userName)
-    .maybeSingle();
-
-  if (existingName) {
-    return { success: false as const, message: 'Username already taken' };
-  }
-
   const password_hash = await bcrypt.hash(password, 10);
 
   const { data: newUser, error } = await supabase
