@@ -118,6 +118,11 @@ export async function getLinkList(userId: number) {
   return (data ?? []).map(formatLink);
 }
 
+async function getUserProStatus(userId: number): Promise<boolean> {
+  const { data } = await supabase.from('users').select('is_pro').eq('id', userId).single();
+  return (data?.is_pro ?? 0) >= 1;
+}
+
 export async function saveLink(
   userId: number,
   params: {
@@ -155,6 +160,15 @@ export async function saveLink(
     return { success: false as const, message: 'That URL is already taken' };
   }
 
+  // Pro features are silently stripped for free users — prevents API bypass
+  // even when the UI already hides these fields from non-Pro accounts.
+  const isPro = await getUserProStatus(userId);
+  const emailNotify = isPro ? params.emailNotify : false;
+  const trackIp     = isPro ? params.trackIp     : false;
+  const cost        = isPro ? params.cost        : 0;
+  const expiryCount = isPro ? (params.expiryCount ?? 0) : 0;
+  const expiryOn    = isPro ? (params.expiryOn || null) : null;
+
   // SECURITY (H3): encrypt the password before storing.
   const encryptedPwd = params.password ? encryptLinkPassword(params.password) : null;
 
@@ -165,11 +179,11 @@ export async function saveLink(
     passdrop_pwd: encryptedPwd,
     service: params.service,
     link_type: params.linkType,
-    email_notify: params.emailNotify,
-    track_ip: params.trackIp,
-    is_paid: params.cost > 0 ? params.cost : null,
-    expire_count: params.expiryCount ?? 0,
-    expires_on: params.expiryOn || null,
+    email_notify: emailNotify,
+    track_ip: trackIp,
+    is_paid: cost > 0 ? cost : null,
+    expire_count: expiryCount,
+    expires_on: expiryOn,
     download_count: 0,
     created_on: new Date().toISOString().split('T')[0],
   });
@@ -222,6 +236,14 @@ export async function updateLink(
 
   if (slugConflict) return { success: false as const, message: 'That URL is already taken' };
 
+  // Pro features are stripped for free users (same as saveLink).
+  const isPro = await getUserProStatus(userId);
+  const emailNotify = isPro ? params.emailNotify : false;
+  const trackIp     = isPro ? params.trackIp     : false;
+  const cost        = isPro ? params.cost        : 0;
+  const expiryCount = isPro ? (params.expiryCount ?? 0) : 0;
+  const expiryOn    = isPro ? (params.expiryOn || null) : null;
+
   // SECURITY (H3): encrypt the password before storing.
   const encryptedPwd = params.password ? encryptLinkPassword(params.password) : null;
 
@@ -231,11 +253,11 @@ export async function updateLink(
       dropbox_url: params.files.map((f) => f.url).join(','),
       passdrop_url: params.link,
       passdrop_pwd: encryptedPwd,
-      email_notify: params.emailNotify,
-      track_ip: params.trackIp,
-      is_paid: params.cost > 0 ? params.cost : null,
-      expire_count: params.expiryCount ?? 0,
-      expires_on: params.expiryOn || null,
+      email_notify: emailNotify,
+      track_ip: trackIp,
+      is_paid: cost > 0 ? cost : null,
+      expire_count: expiryCount,
+      expires_on: expiryOn,
     })
     .eq('id', params.id);
 
