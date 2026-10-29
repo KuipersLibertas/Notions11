@@ -3,7 +3,7 @@ import MainLayout from '@/layouts/Main';
 
 import { default as UploadLogoView } from '@/views/user/UploadLogo';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
 import { AppMode, UserLevel } from '@/utils/constants';
 
