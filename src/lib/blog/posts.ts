@@ -2,6 +2,42 @@ import type { IPost } from '@/types';
 
 const posts: IPost[] = [
   {
+    "id": "how-to-password-protect-a-notion-page",
+    "uuid": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+    "slug": "how-to-password-protect-a-notion-page",
+    "title": "How to Password Protect a Notion Page",
+    "html": "<article><p>Notion doesn't let you password protect a shared page. Not natively. When you hit \"Share to web\" and turn on the public link, anyone who gets that URL can open it — no password, no sign-in required.</p><p>That's by design. Notion's share model is binary: private (invite-only) or public (open to anyone with the link). There's no middle ground built in.</p><p>If you're sharing something you want to control — a template you sell, course materials for enrolled students, a client deliverable — that's a real problem. Here's what you can actually do about it.</p><h2 id=\"why-notion-has-no-native-password-protection\">Why Notion has no native password protection</h2><p>Notion's public sharing is meant for open collaboration and publishing. Their use case is a public wiki, a shared team doc, a landing page built on Notion. Not gated content.</p><p>The closest Notion gets is inviting specific people by email. That requires each recipient to have a Notion account. If you're sharing with a client who doesn't use Notion, or selling a template to buyers you've never met, invite-only doesn't scale.</p><h2 id=\"option-1-invite-only\">Option 1: Invite-only (no third-party tool needed)</h2><p>If your recipients all have Notion accounts and you trust each of them individually, this works.</p><ol><li>Open your page in Notion.</li><li>Click \"Share\" in the top right.</li><li>Click \"Invite\" and type each person's email.</li><li>Set their permission level: Can view, Can comment, or Can edit.</li><li>Do <strong>not</strong> turn on \"Share to web.\"</li></ol><p>The page stays private. Only invited accounts can view it.</p><p><strong>The catch:</strong> Each person needs a Notion account. You manage the list manually. If you're distributing a template to 200 buyers, this isn't the move.</p><h2 id=\"option-2-use-notions11\">Option 2: Use Notions11 (a password gate in front of your public link)</h2><p>This is the simplest path when you need a shareable URL with a password. <a href=\"https://notions11.com\">Notions11</a> wraps your Notion share link in a gated page at <code>notions11.com/your-slug</code>. Recipients enter a password, then get forwarded to your original Notion page.</p><p>Here's how to set it up:</p><ol><li>In Notion, open your page and click \"Share\" → turn on \"Share to web\" → copy the link.</li><li>Go to <a href=\"https://notions11.com\">notions11.com</a> and paste your Notion link.</li><li>Click \"Next.\" You'll get an auto-generated slug and password — or set your own custom ones.</li><li>Save the link. Share the Notions11 URL and the password with your intended recipients.</li></ol><p>That's it. Your Notion page stays exactly as it is. Notions11 just adds the gate in front.</p><p>The free tier covers basic password protection. Upgrade to <a href=\"https://notions11.com/user/prosignup\">Notions11 Pro</a> ($5/month) and you also get:</p><ul><li>Email notification when someone accesses your link</li><li>Access expiry by date or by number of views</li><li>IP and location tracking per access</li><li>Custom slugs for cleaner-looking URLs</li></ul><p>Here's a concrete example: you're selling a Notion productivity dashboard on Gumroad. Paste the \"thank you\" Notion page into Notions11, set a password, and include it in your Gumroad delivery email. Buyers get access; anyone who finds the Notions11 link without the password hits a wall.</p><h2 id=\"option-3-other-tools\">Option 3: Other tools</h2><p>A few alternatives exist:</p><ul><li><strong>Super.so / Potion</strong> — publish Notion pages as full websites with password protection as one feature. More powerful, but they charge $10–12/month and require a custom domain connection.</li><li><strong>Papermark</strong> — a document sharing platform that supports Notion links among other file types.</li></ul><p>If all you want is a password gate, those tools carry more setup than the job requires. Notions11 is Notion-only and does one thing well.</p><h2 id=\"which-approach-should-you-use\">Which approach should you use?</h2><table><thead><tr><th>Situation</th><th>Best option</th></tr></thead><tbody><tr><td>Sharing with colleagues who have Notion accounts</td><td>Invite-only</td></tr><tr><td>Distributing or selling a template</td><td>Notions11 (free)</td></tr><tr><td>Sharing course materials with students</td><td>Notions11 Pro (expiry + tracking)</td></tr><tr><td>Client deliverable with proof of access</td><td>Notions11 Pro (email notifications)</td></tr><tr><td>Need a fully custom domain + site builder</td><td>Super.so or Potion</td></tr></tbody></table><h2 id=\"common-question-does-the-password-actually-prevent-access\">Does the password actually prevent access?</h2><p>Yes, with one caveat worth knowing. Your underlying Notion page stays public — it has to be, otherwise the forward won't work. The protection sits at the Notions11 layer: recipients need the correct password to get the forwarding URL.</p><p>This means the protection depends on keeping your Notions11 link private. If someone shares the original Notion URL directly (bypassing the Notions11 link), they skip the gate. For most use cases — template distribution, course materials, client deliverables — this is a non-issue in practice. You can also <a href=\"https://notions11.com/blog/how-to-use-analytics-on-your-links\">track who accessed your link</a> to monitor for unexpected access.</p><p>If you need true access control — where specific named individuals are the only ones who can ever reach the content — use invite-only instead.</p><h2 id=\"quick-summary\">The quick summary</h2><p>Notion has no native password protection for shared links. Your three options:</p><ol><li><strong>Invite-only</strong> — works, but requires Notion accounts and manual management per recipient</li><li><strong>Notions11</strong> — paste your link, get a password-gated URL in under a minute, <a href=\"https://notions11.com\">free to start</a></li><li><strong>Super.so / Potion</strong> — full site builder with password option, higher cost and more setup</li></ol><p>For most creators and freelancers sharing Notion pages with people outside their team, Notions11 is the fastest path. No re-upload. No new platform to learn. Your Notion page stays unchanged.</p></article>",
+    "comment_id": "",
+    "feature_image": "",
+    "featured": false,
+    "visibility": "public",
+    "created_at": "2026-10-29T10:00:00.000Z",
+    "updated_at": "2026-10-29T10:00:00.000Z",
+    "published_at": "2026-10-29T10:00:00.000Z",
+    "custom_excerpt": "Notion has no native password protection for shared pages. Here are three ways to gate your Notion links — and when to use each one.",
+    "feature_image_caption": "",
+    "feature_image_alt": "",
+    "frontmatter": "",
+    "email_subject": "",
+    "meta_description": "Notion has no native password protection for shared pages. Here are three ways to gate your Notion links — and when to use each one.",
+    "meta_title": "How to Password Protect a Notion Page",
+    "twitter_description": "Notion has no native password protection for shared pages. Here are three ways to gate your Notion links — and when to use each one.",
+    "twitter_title": "How to Password Protect a Notion Page",
+    "twitter_image": "",
+    "og_image": "",
+    "og_title": "How to Password Protect a Notion Page",
+    "og_description": "Notion has no native password protection for shared pages. Here are three ways to gate your Notion links — and when to use each one.",
+    "comments": false,
+    "access": true,
+    "reading_time": 5,
+    "excerpt": "Notion has no native password protection for shared pages. Here are three ways to gate your Notion links — and when to use each one.",
+    "url": "",
+    "canonical_url": "",
+    "primary_author": {
+      "name": "Robin"
+    }
+  },
+  {
     "id": "unlock-the-power-of-notion-content-sharing",
     "uuid": "unlock-the-power-of-notion-content-sharing",
     "slug": "unlock-the-power-of-notion-content-sharing",
