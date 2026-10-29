@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f1117"/>
+      <stop offset="100%" stop-color="#1a1f2e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle grid pattern -->
+  <pattern id="grid" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+    <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#ffffff08" stroke-width="1"/>
+  </pattern>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+
+  <!-- Clock graphic -->
+  <circle cx="900" cy="315" r="180" fill="none" stroke="#6366f130" stroke-width="2"/>
+  <circle cx="900" cy="315" r="140" fill="none" stroke="#6366f120" stroke-width="1"/>
+  <circle cx="900" cy="315" r="100" fill="#6366f110" stroke="#6366f140" stroke-width="2"/>
+  <!-- Hour hand -->
+  <line x1="900" y1="315" x2="900" y2="240" stroke="#8b5cf6" stroke-width="5" stroke-linecap="round"/>
+  <!-- Minute hand -->
+  <line x1="900" y1="315" x2="955" y2="315" stroke="#6366f1" stroke-width="3" stroke-linecap="round"/>
+  <!-- Center dot -->
+  <circle cx="900" cy="315" r="6" fill="#8b5cf6"/>
+  <!-- Clock markers -->
+  <line x1="900" y1="220" x2="900" y2="232" stroke="#6366f160" stroke-width="3" stroke-linecap="round"/>
+  <line x1="900" y1="398" x2="900" y2="410" stroke="#6366f160" stroke-width="3" stroke-linecap="round"/>
+  <line x1="800" y1="315" x2="812" y2="315" stroke="#6366f160" stroke-width="3" stroke-linecap="round"/>
+  <line x1="988" y1="315" x2="1000" y2="315" stroke="#6366f160" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Expiry tag -->
+  <rect x="820" y="400" width="160" height="36" rx="18" fill="#ef444430"/>
+  <text x="900" y="423" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#f87171" text-anchor="middle" font-weight="600">EXPIRES NOV 30</text>
+
+  <!-- Left content -->
+  <!-- Notions11 brand -->
+  <text x="80" y="100" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#6366f1" font-weight="700" letter-spacing="2">NOTIONS11</text>
+
+  <!-- Accent line -->
+  <rect x="80" y="120" width="60" height="3" rx="2" fill="url(#accent)"/>
+
+  <!-- Main headline -->
+  <text x="80" y="210" font-family="system-ui, -apple-system, sans-serif" font-size="56" fill="#ffffff" font-weight="700">How to Set an</text>
+  <text x="80" y="280" font-family="system-ui, -apple-system, sans-serif" font-size="56" fill="#ffffff" font-weight="700">Expiry Date on</text>
+  <text x="80" y="350" font-family="system-ui, -apple-system, sans-serif" font-size="56" fill="url(#accent)" font-weight="700">a Notion Link</text>
+
+  <!-- Subtitle -->
+  <text x="80" y="420" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="#94a3b8">Date-based and view-count expiry</text>
+  <text x="80" y="450" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="#94a3b8">for any Notion share link</text>
+
+  <!-- Bottom tag -->
+  <rect x="80" y="530" width="130" height="32" rx="16" fill="#6366f120" stroke="#6366f140" stroke-width="1"/>
+  <text x="145" y="551" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#a5b4fc" text-anchor="middle">notions11.com</text>
+</svg>

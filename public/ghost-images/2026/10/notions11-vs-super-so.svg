@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f1117"/>
+      <stop offset="100%" stop-color="#1a1520"/>
+    </linearGradient>
+    <linearGradient id="left-accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="right-accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#ef4444"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <pattern id="grid" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+    <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#ffffff08" stroke-width="1"/>
+  </pattern>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+
+  <!-- VS divider -->
+  <line x1="600" y1="60" x2="600" y2="570" stroke="#ffffff10" stroke-width="1" stroke-dasharray="8 8"/>
+  <circle cx="600" cy="315" r="40" fill="#1a1f2e" stroke="#ffffff20" stroke-width="1"/>
+  <text x="600" y="323" font-family="system-ui, -apple-system, sans-serif" font-size="26" fill="#ffffff60" text-anchor="middle" font-weight="900">VS</text>
+
+  <!-- Left side: Notions11 -->
+  <text x="80" y="100" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#6366f1" font-weight="700" letter-spacing="2">NOTIONS11</text>
+  <rect x="80" y="115" width="60" height="3" rx="2" fill="url(#left-accent)"/>
+
+  <text x="80" y="200" font-family="system-ui, -apple-system, sans-serif" font-size="48" fill="#ffffff" font-weight="800">Notions11</text>
+
+  <!-- Notions11 feature pills -->
+  <rect x="80" y="240" width="160" height="28" rx="14" fill="#6366f120" stroke="#6366f150" stroke-width="1"/>
+  <text x="160" y="259" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#a5b4fc" text-anchor="middle">Password gate</text>
+
+  <rect x="80" y="278" width="144" height="28" rx="14" fill="#6366f120" stroke="#6366f150" stroke-width="1"/>
+  <text x="152" y="297" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#a5b4fc" text-anchor="middle">Link expiry</text>
+
+  <rect x="80" y="316" width="168" height="28" rx="14" fill="#6366f120" stroke="#6366f150" stroke-width="1"/>
+  <text x="164" y="335" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#a5b4fc" text-anchor="middle">Access tracking</text>
+
+  <rect x="80" y="354" width="152" height="28" rx="14" fill="#6366f120" stroke="#6366f150" stroke-width="1"/>
+  <text x="156" y="373" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#a5b4fc" text-anchor="middle">Under 1 minute</text>
+
+  <text x="80" y="440" font-family="system-ui, -apple-system, sans-serif" font-size="32" fill="#6366f1" font-weight="800">Free / $5 mo</text>
+
+  <!-- Right side: Super.so -->
+  <text x="660" y="100" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#f59e0b" font-weight="700" letter-spacing="2">SUPER.SO</text>
+  <rect x="660" y="115" width="60" height="3" rx="2" fill="url(#right-accent)"/>
+
+  <text x="660" y="200" font-family="system-ui, -apple-system, sans-serif" font-size="48" fill="#ffffff" font-weight="800">Super.so</text>
+
+  <!-- Super.so feature pills -->
+  <rect x="660" y="240" width="160" height="28" rx="14" fill="#f59e0b20" stroke="#f59e0b50" stroke-width="1"/>
+  <text x="740" y="259" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#fcd34d" text-anchor="middle">Custom domain</text>
+
+  <rect x="660" y="278" width="144" height="28" rx="14" fill="#f59e0b20" stroke="#f59e0b50" stroke-width="1"/>
+  <text x="732" y="297" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#fcd34d" text-anchor="middle">Site builder</text>
+
+  <rect x="660" y="316" width="144" height="28" rx="14" fill="#f59e0b20" stroke="#f59e0b50" stroke-width="1"/>
+  <text x="732" y="335" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#fcd34d" text-anchor="middle">Custom design</text>
+
+  <rect x="660" y="354" width="152" height="28" rx="14" fill="#f59e0b20" stroke="#f59e0b50" stroke-width="1"/>
+  <text x="736" y="373" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#fcd34d" text-anchor="middle">Several hours setup</text>
+
+  <text x="660" y="440" font-family="system-ui, -apple-system, sans-serif" font-size="32" fill="#f59e0b" font-weight="800">~$16 / mo</text>
+
+  <!-- Bottom headline -->
+  <text x="600" y="530" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#64748b" text-anchor="middle">Which should you use to gate Notion content?</text>
+  <text x="600" y="560" font-family="system-ui, -apple-system, sans-serif" font-size="15" fill="#475569" text-anchor="middle">notions11.com</text>
+</svg>
