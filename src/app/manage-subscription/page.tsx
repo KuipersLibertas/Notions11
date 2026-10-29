@@ -2,7 +2,7 @@ import React from 'react';
 import MainLayout from '@/layouts/Main';
 
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 import { default as ManageSubScriptionView } from '@/views/ManageSubScription';
 import { redirect } from 'next/navigation';
 import { getSubscription } from '@/lib/db/user';

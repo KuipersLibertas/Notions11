@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { IServerLinkDetail } from '@/types';
 import { getLinkDetail } from '@/lib/db/links';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 import MainLayout from '@/layouts/Main';
 
 // Private pages — never index

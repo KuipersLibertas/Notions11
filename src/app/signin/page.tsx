@@ -4,7 +4,7 @@ import MainLayout from '@/layouts/Main';
 
 import { default as SignInView } from '@/views/auth/SignIn';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
