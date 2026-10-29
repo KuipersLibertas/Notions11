@@ -122,6 +122,13 @@ export default function RootLayout({
             strategy="beforeInteractive"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
           />
+          {/* Google AdSense — Auto Ads + site verification */}
+          <Script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3746260233604933"
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
           {/* Google Analytics — fires on every page */}
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-DVL1BCNBS0"
