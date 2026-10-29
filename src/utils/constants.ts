@@ -18,6 +18,7 @@ export const UserLevel = {
 export const LinkType = {
   DropBox: 1,
   GoogleDrive: 2,
+  Notion: 3,     // The only active type on Notions11
 };
 
 export const PricePlan = {

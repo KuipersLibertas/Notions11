@@ -8,6 +8,7 @@ import { LoadingButton } from '@mui/lab';
 import { KeyboardDoubleArrowRight } from '@mui/icons-material';
 import { IChooseLink, IValidationError } from '@/types';
 import { generateLink, generatePassword } from '@/utils/functions';
+import { LinkType } from '@/utils/constants';
 
 type EnterLinkProps = {
   onEntered: (data: IChooseLink) => void,
@@ -40,7 +41,7 @@ const EnterLink = ({ onEntered }: EnterLinkProps): JSX.Element => {
 
     const data: IChooseLink = {
       link: generateLink(),
-      service: 3,
+      service: LinkType.Notion,
       password: generatePassword(),
       files: [
         {
