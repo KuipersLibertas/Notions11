@@ -83,11 +83,11 @@ export async function register(
     return { success: false as const, message: 'Registration failed' };
   }
 
-  // Fire-and-forget: add to Brevo welcome list and send welcome email
-  Promise.all([
+  // Await both so Vercel doesn't kill them before they complete; errors are swallowed so Brevo never blocks signup
+  await Promise.allSettled([
     addToWelcomeList(normalizedEmail, userName),
     sendWelcomeEmail(normalizedEmail, userName),
-  ]).catch(() => {});
+  ]);
 
   return { success: true as const, user: formatUser(newUser) };
 }
