@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { supabase } from '@/lib/supabase';
 import { sendPasswordResetEmail } from '@/lib/email';
+import { addToWelcomeList, sendWelcomeEmail } from '@/lib/brevo';
 
 type UserRow = {
   id: number;
@@ -91,6 +92,12 @@ export async function register(
   if (error || !newUser) {
     return { success: false as const, message: 'Registration failed' };
   }
+
+  // Fire-and-forget: add to Brevo welcome list and send welcome email
+  Promise.all([
+    addToWelcomeList(normalizedEmail, userName),
+    sendWelcomeEmail(normalizedEmail, userName),
+  ]).catch(() => {});
 
   return { success: true as const, user: formatUser(newUser) };
 }
