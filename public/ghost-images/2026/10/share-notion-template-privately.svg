@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f1117"/>
+      <stop offset="100%" stop-color="#1a2420"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <pattern id="grid" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+    <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#ffffff08" stroke-width="1"/>
+  </pattern>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+
+  <!-- Lock graphic -->
+  <rect x="820" y="220" width="160" height="120" rx="12" fill="#10b98110" stroke="#10b98140" stroke-width="2"/>
+  <!-- Lock shackle -->
+  <path d="M 850 220 L 850 185 Q 850 155 900 155 Q 950 155 950 185 L 950 220" fill="none" stroke="#10b98160" stroke-width="8" stroke-linecap="round"/>
+  <!-- Keyhole -->
+  <circle cx="900" cy="275" r="16" fill="#10b981"/>
+  <rect x="893" y="275" width="14" height="24" rx="4" fill="#10b981"/>
+
+  <!-- Key graphic -->
+  <circle cx="820" cy="420" r="28" fill="none" stroke="#10b98150" stroke-width="5"/>
+  <circle cx="820" cy="420" r="12" fill="none" stroke="#10b98150" stroke-width="3"/>
+  <line x1="848" y1="420" x2="940" y2="420" stroke="#10b98150" stroke-width="5" stroke-linecap="round"/>
+  <line x1="920" y1="420" x2="920" y2="436" stroke="#10b98150" stroke-width="4" stroke-linecap="round"/>
+  <line x1="940" y1="420" x2="940" y2="436" stroke="#10b98150" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Gumroad badge -->
+  <rect x="840" y="470" width="120" height="30" rx="15" fill="#10b98120"/>
+  <text x="900" y="490" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#6ee7b7" text-anchor="middle" font-weight="600">Gumroad ready</text>
+
+  <!-- Left content -->
+  <text x="80" y="100" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#10b981" font-weight="700" letter-spacing="2">NOTIONS11</text>
+  <rect x="80" y="120" width="60" height="3" rx="2" fill="url(#accent)"/>
+
+  <text x="80" y="210" font-family="system-ui, -apple-system, sans-serif" font-size="56" fill="#ffffff" font-weight="700">How to Share a</text>
+  <text x="80" y="280" font-family="system-ui, -apple-system, sans-serif" font-size="56" fill="#ffffff" font-weight="700">Notion Template</text>
+  <text x="80" y="350" font-family="system-ui, -apple-system, sans-serif" font-size="56" fill="url(#accent)" font-weight="700">Privately</text>
+
+  <text x="80" y="420" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="#94a3b8">Password-gate your template link</text>
+  <text x="80" y="450" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="#94a3b8">so only buyers get in</text>
+
+  <rect x="80" y="530" width="130" height="32" rx="16" fill="#10b98120" stroke="#10b98140" stroke-width="1"/>
+  <text x="145" y="551" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#6ee7b7" text-anchor="middle">notions11.com</text>
+</svg>
