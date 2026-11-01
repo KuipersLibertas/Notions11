@@ -19,8 +19,7 @@ export const authOptions: NextAuthOptions = {
         try {
           const response = await login(credentials.email, credentials.password);
           if (!response.success) {
-            console.log(response.message);
-            return null;
+            throw new Error(response.message);
           }
 
           const user = response.user;

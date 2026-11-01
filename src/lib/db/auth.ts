@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { supabase } from '@/lib/supabase';
-import { sendPasswordResetEmail } from '@/lib/email';
+import { sendPasswordResetEmail, sendVerificationEmail } from '@/lib/email';
 import { addToWelcomeList, sendWelcomeEmail } from '@/lib/brevo';
 
 type UserRow = {
@@ -49,6 +49,10 @@ export async function login(email: string, password: string) {
     return { success: false as const, message: 'Invalid password' };
   }
 
+  if (user.email_verified === false) {
+    return { success: false as const, message: 'Please verify your email before signing in. Check your inbox for the verification link.' };
+  }
+
   return { success: true as const, user: formatUser(user) };
 }
 
@@ -75,7 +79,7 @@ export async function register(
 
   const { data: newUser, error } = await supabase
     .from('users')
-    .insert({ user_name: userName, user_email: normalizedEmail, password_hash, is_pro: 0, balance: 0 })
+    .insert({ user_name: userName, user_email: normalizedEmail, password_hash, is_pro: 0, balance: 0, email_verified: false })
     .select()
     .single();
 
@@ -83,8 +87,22 @@ export async function register(
     return { success: false as const, message: 'Registration failed' };
   }
 
-  // Await both so Vercel doesn't kill them before they complete; errors are swallowed so Brevo never blocks signup
+  // Create email verification token (24-hour expiry)
+  const token = crypto.randomBytes(32).toString('hex');
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+  await supabase.from('email_verification_tokens').insert({
+    user_id: newUser.id,
+    token_hash: tokenHash,
+    expires_at: expiresAt,
+  });
+
+  const siteUrl = process.env.NEXT_PUBLIC_NOTIONS11_SITE_URL ?? 'https://notions11.com';
+  const verifyUrl = `${siteUrl}/verify-email?token=${encodeURIComponent(token)}`;
+
   await Promise.allSettled([
+    sendVerificationEmail(normalizedEmail, userName, verifyUrl),
     addToWelcomeList(normalizedEmail, userName),
     sendWelcomeEmail(normalizedEmail, userName),
   ]);
