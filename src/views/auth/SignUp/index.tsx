@@ -2,7 +2,6 @@
 
 import React, { useRef, useState } from 'react';
 import * as yup from 'yup';
-import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
 import {
   Box,
@@ -47,14 +46,60 @@ const validationSchema = yup.object({
 
 const SignUp = (): JSX.Element => {
   const theme = useTheme();
-  const router = useRouter();
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [captchaToken, setCaptchaToken] = useState<string>('');
+  const [registered, setRegistered] = useState<boolean>(false);
   const captchaRef = useRef<HCaptcha>(null);
 
   const isLight = theme.palette.mode === 'light';
+
+  if (registered) {
+    return (
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        minHeight="calc(100vh - 68px)"
+        sx={{
+          background: isLight
+            ? 'linear-gradient(160deg, #f0f7ff 0%, #ffffff 40%, #f5f0ff 100%)'
+            : 'linear-gradient(160deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
+          px: 2,
+        }}
+      >
+        <Paper
+          elevation={0}
+          sx={{
+            width: '100%',
+            maxWidth: 480,
+            p: { xs: 3, sm: 5 },
+            borderRadius: 4,
+            border: `1.5px solid ${alpha(theme.palette.divider, isLight ? 0.8 : 0.4)}`,
+            boxShadow: isLight
+              ? `0 20px 60px -12px ${alpha(theme.palette.primary.main, 0.12)}, 0 8px 24px -8px rgba(0,0,0,0.06)`
+              : `0 20px 60px -12px rgba(0,0,0,0.4)`,
+            textAlign: 'center',
+          }}
+        >
+          <Typography variant="h4" fontWeight={800} letterSpacing="-0.02em" gutterBottom>
+            Check your inbox
+          </Typography>
+          <Typography color="text.secondary" mb={2}>
+            We sent a verification link to your email address. Click the link to activate your account.
+          </Typography>
+          <Typography color="text.secondary" variant="body2">
+            Didn&apos;t get it? Check your spam folder or{' '}
+            <Link href="/signin" sx={{ color: 'primary.main', fontWeight: 600, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+              sign in
+            </Link>{' '}
+            to request a new link.
+          </Typography>
+        </Paper>
+      </Box>
+    );
+  }
 
   const initialValues: ISignUpFormFields = {
     firstName: '',
@@ -83,8 +128,7 @@ const SignUp = (): JSX.Element => {
         captchaRef.current?.resetCaptcha();
         setCaptchaToken('');
         if (response.success) {
-          toast.success('Account created! Check your email to verify your address.', CustomToastOptions);
-          router.push('/signin');
+          setRegistered(true);
         } else {
           toast.error(response.message, CustomToastOptions);
         }
