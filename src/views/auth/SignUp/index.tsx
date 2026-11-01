@@ -132,11 +132,7 @@ const SignUp = (): JSX.Element => {
             We sent a verification link to your email address. Click the link to activate your account.
           </Typography>
           <Typography color="text.secondary" variant="body2">
-            Didn&apos;t get it? Check your spam folder or{' '}
-            <Link href="/signin" sx={{ color: 'primary.main', fontWeight: 600, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
-              sign in
-            </Link>{' '}
-            to request a new link.
+            Didn&apos;t get it? Check your spam folder. If you still don&apos;t see it, try signing up again with the same email address.
           </Typography>
         </Paper>
       </Box>
