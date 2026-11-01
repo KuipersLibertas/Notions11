@@ -55,6 +55,48 @@ const SignUp = (): JSX.Element => {
 
   const isLight = theme.palette.mode === 'light';
 
+  const initialValues: ISignUpFormFields = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  };
+
+  const onSubmit = async (values: ISignUpFormFields): Promise<void> => {
+    if (isProcessing) return;
+    if (!captchaToken) {
+      toast.error('Please complete the captcha.', CustomToastOptions);
+      return;
+    }
+    setIsProcessing(true);
+    signUp({
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.email,
+      password: values.password,
+      captchaToken,
+    })
+      .then((response) => {
+        setIsProcessing(false);
+        captchaRef.current?.resetCaptcha();
+        setCaptchaToken('');
+        if (response.success) {
+          setRegistered(true);
+        } else {
+          toast.error(response.message, CustomToastOptions);
+        }
+      })
+      .catch((error) => {
+        setIsProcessing(false);
+        captchaRef.current?.resetCaptcha();
+        setCaptchaToken('');
+        toast.error(error.message, CustomToastOptions);
+      });
+  };
+
+  const formik = useFormik({ initialValues, validationSchema, onSubmit });
+
   if (registered) {
     return (
       <Box
@@ -100,48 +142,6 @@ const SignUp = (): JSX.Element => {
       </Box>
     );
   }
-
-  const initialValues: ISignUpFormFields = {
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  };
-
-  const onSubmit = async (values: ISignUpFormFields): Promise<void> => {
-    if (isProcessing) return;
-    if (!captchaToken) {
-      toast.error('Please complete the captcha.', CustomToastOptions);
-      return;
-    }
-    setIsProcessing(true);
-    signUp({
-      firstName: values.firstName,
-      lastName: values.lastName,
-      email: values.email,
-      password: values.password,
-      captchaToken,
-    })
-      .then((response) => {
-        setIsProcessing(false);
-        captchaRef.current?.resetCaptcha();
-        setCaptchaToken('');
-        if (response.success) {
-          setRegistered(true);
-        } else {
-          toast.error(response.message, CustomToastOptions);
-        }
-      })
-      .catch((error) => {
-        setIsProcessing(false);
-        captchaRef.current?.resetCaptcha();
-        setCaptchaToken('');
-        toast.error(error.message, CustomToastOptions);
-      });
-  };
-
-  const formik = useFormik({ initialValues, validationSchema, onSubmit });
 
   return (
     <Box
