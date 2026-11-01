@@ -64,7 +64,7 @@ const SignInForm = ({ onShowForgotPassword, onCallback }: SignFormProps): JSX.El
       if (res?.ok) {
         onCallback();
       } else {
-        toast.error('Incorrect email or password', CustomToastOptions);
+        toast.error(res?.error ?? 'Incorrect email or password', CustomToastOptions);
       }
     });
   };

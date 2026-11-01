@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import * as yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
@@ -24,6 +24,7 @@ import {
   VisibilityOff,
 } from '@mui/icons-material';
 import { alpha, useTheme } from '@mui/material/styles';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { signUp } from '@/api';
 import { toast } from 'react-toastify';
 import { CustomToastOptions } from '@/utils/constants';
@@ -50,6 +51,8 @@ const SignUp = (): JSX.Element => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
+  const [captchaToken, setCaptchaToken] = useState<string>('');
+  const captchaRef = useRef<HCaptcha>(null);
 
   const isLight = theme.palette.mode === 'light';
 
@@ -63,17 +66,24 @@ const SignUp = (): JSX.Element => {
 
   const onSubmit = async (values: ISignUpFormFields): Promise<void> => {
     if (isProcessing) return;
+    if (!captchaToken) {
+      toast.error('Please complete the captcha.', CustomToastOptions);
+      return;
+    }
     setIsProcessing(true);
     signUp({
       firstName: values.firstName,
       lastName: values.lastName,
       email: values.email,
       password: values.password,
+      captchaToken,
     })
       .then((response) => {
         setIsProcessing(false);
+        captchaRef.current?.resetCaptcha();
+        setCaptchaToken('');
         if (response.success) {
-          toast.success('Account created! Please sign in.', CustomToastOptions);
+          toast.success('Account created! Check your email to verify your address.', CustomToastOptions);
           router.push('/signin');
         } else {
           toast.error(response.message, CustomToastOptions);
@@ -81,6 +91,8 @@ const SignUp = (): JSX.Element => {
       })
       .catch((error) => {
         setIsProcessing(false);
+        captchaRef.current?.resetCaptcha();
+        setCaptchaToken('');
         toast.error(error.message, CustomToastOptions);
       });
   };
@@ -281,6 +293,17 @@ const SignUp = (): JSX.Element => {
                   ),
                 }}
               />
+            </Grid>
+            <Grid item xs={12}>
+              <Box display="flex" justifyContent="center">
+                <HCaptcha
+                  ref={captchaRef}
+                  sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? ''}
+                  onVerify={(token) => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken('')}
+                  theme={theme.palette.mode as 'light' | 'dark'}
+                />
+              </Box>
             </Grid>
             <Grid item xs={12}>
               <LoadingButton
