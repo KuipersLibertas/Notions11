@@ -33,7 +33,7 @@ export function generateMetadata({ params }: { params: { id: string } }): Metada
       title: post?.title ?? 'Notions11 Blog',
       description: post?.custom_excerpt ?? undefined,
       images: post?.feature_image
-        ? [{ url: post.feature_image, width: 1200, height: 630 }]
+        ? [{ url: post.feature_image, width: 1200, height: 630, alt: post.feature_image_alt || post.title }]
         : undefined,
       publishedTime: post?.published_at ?? undefined,
       modifiedTime: post?.updated_at ?? undefined,
