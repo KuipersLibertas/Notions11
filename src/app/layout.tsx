@@ -37,9 +37,6 @@ export const metadata: Metadata = {
     'notion link analytics',
     'notion custom url',
   ],
-  alternates: {
-    canonical: SITE_URL,
-  },
   openGraph: {
     type: 'website',
     siteName: SITE_NAME,
