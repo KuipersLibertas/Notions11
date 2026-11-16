@@ -23,15 +23,15 @@ export function generateMetadata({ params }: { params: { id: string } }): Metada
   const canonicalUrl = `${SITE_URL}/blog/${post?.slug ?? params.id}`;
 
   return {
-    title: post?.title ?? 'Blog',
-    description: post?.custom_excerpt ?? undefined,
+    title: post?.meta_title || post?.title || 'Blog',
+    description: post?.meta_description || post?.custom_excerpt || undefined,
     alternates: { canonical: canonicalUrl },
     openGraph: {
       type: 'article',
       siteName: 'Notions11',
       url: canonicalUrl,
-      title: post?.title ?? 'Notions11 Blog',
-      description: post?.custom_excerpt ?? undefined,
+      title: post?.og_title || post?.meta_title || post?.title || 'Notions11 Blog',
+      description: post?.og_description || post?.meta_description || post?.custom_excerpt || undefined,
       images: post?.feature_image
         ? [{ url: post.feature_image, width: 1200, height: 630, alt: post.feature_image_alt || post.title }]
         : undefined,
@@ -41,8 +41,8 @@ export function generateMetadata({ params }: { params: { id: string } }): Metada
     twitter: {
       card: 'summary_large_image',
       site: '@Notions_11',
-      title: post?.title ?? 'Notions11 Blog',
-      description: post?.custom_excerpt ?? undefined,
+      title: post?.twitter_title || post?.meta_title || post?.title || 'Notions11 Blog',
+      description: post?.twitter_description || post?.meta_description || post?.custom_excerpt || undefined,
       images: post?.feature_image ? [post.feature_image] : undefined,
     },
   };
