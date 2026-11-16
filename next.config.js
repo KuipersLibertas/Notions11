@@ -42,6 +42,17 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
+  async redirects() {
+    return [
+      {
+        // Old blog share buttons linked to /blog/detail/<slug>, which 404s.
+        // Send any of those links still in the wild to the real post URL.
+        source: '/blog/detail/:slug',
+        destination: '/blog/:slug',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

@@ -17,6 +17,8 @@ import {
 } from '@mui/icons-material';
 import { IPost } from '@/types';
 
+const SITE_URL = 'https://www.notions11.com';
+
 
 const BlogDetail = ({ post }: { post: IPost }): JSX.Element => {
 
@@ -42,13 +44,13 @@ const BlogDetail = ({ post }: { post: IPost }): JSX.Element => {
           <Box marginLeft={0.5}>            
             <IconButton
               aria-label="Twitter"
-              href={`https://twitter.com/intent/tweet?text=${post.title}&url=${process.env.NEXT_PUBLIC_NOTIONS11_SITE_URL}/blog/detail/${post.slug}`}
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(`${SITE_URL}/blog/${post.slug}`)}`}
             >
               <TwitterIcon />
             </IconButton>
             <IconButton
               aria-label="Email"
-              href={`mailto:?subject=${post.title}&body=${process.env.NEXT_PUBLIC_NOTIONS11_SITE_URL}/blog/detail/${post.slug}`}
+              href={`mailto:?subject=${encodeURIComponent(post.title)}&body=${encodeURIComponent(`${SITE_URL}/blog/${post.slug}`)}`}
             >
               <EmailIcon />
             </IconButton>
